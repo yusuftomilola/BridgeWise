@@ -1,49 +1,98 @@
-# BridgeWise: The Open-Source Multi-Chain UI
+<p align="center">
+  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+</p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Ecosystem: Stellar](https://img.shields.io/badge/Ecosystem-Stellar/Soroban-purple.svg)](https://stellar.org)
+[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
+[circleci-url]: https://circleci.com/gh/nestjs/nest
 
-**BridgeWise** is a modular, open-source frontend library designed to solve the fragmented user experience in cross-chain finance. By aggregating routes from major bridges into a single, clean, and embeddable interface, we empower developers to keep users within their dApps while moving assets seamlessly across chains.
+  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
+    <p align="center">
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
+<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
+<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
+<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
+<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
+<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
+  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
+    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
+  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+</p>
+  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
+  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
----
+## Description
 
-### 1. Executive Summary
-Most bridges force users to leave a dApp to complete a transfer, creating friction, confusion, and security risks. BridgeWise provides a **"One-Click" bridging experience** that developers can drop into any React or Vue application. It aggregates routes from **Stellar/Soroban, LayerZero, and Hop**, ensuring users always find the fastest and cheapest path without leaving your site.
+[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
-### 2. The Problem
-Bridging remains the most dangerous and confusing part of Web3, often serving as a "drop-off" point for users.
-* **Fragmentation:** Every bridge has a different UI, leading to a disconnected experience.
-* **UI Complexity:** Existing bridge interfaces are often too complex for non-technical users.
-* **Lack of Transparency:** Developers lack high-quality, MIT-licensed components that offer real-time fee comparisons across different ecosystems.
+## Project setup
 
-### 3. Key Features
-* **🚀 Unified Route Discovery:** Automatically compares the fastest and cheapest routes across 10+ chains in real-time.
-* **🎨 Plug-and-Play Components:** Modular React and Vue components that can be styled to match any dApp's design system.
-* **🌌 Native Stellar Support:** Deep integration with the Stellar/Soroban bridge for low-latency, reliable transfers.
-* **💓 Transaction "Heartbeat":** A visual progress tracker that stays active via local state even if the user refreshes their browser.
+```bash
+$ npm install
+```
 
-### 4. Roadmap for this Wave
-* **Phase 1:** Complete the Core React Component Library with initial Stellar-to-Ethereum routing.
-* **Phase 2:** Launch the "Route Comparison" API to fetch real-time fee data from multiple aggregators.
-* **Phase 3:** Establish a "Community Adapter" system where developers can add support for new L2 bridges via PRs.
+## Compile and run the project
 
-### 5. Why BridgeWise belongs in Drips Wave
-* **Public Good:** The entire UI suite is 100% free and MIT-licensed to help the ecosystem grow.
-* **Sustainability:** We use Drips to "pass through" 15% of our funding to the underlying bridge protocols and frontend libraries (like `viem` and `soroban-client`) that we utilize.
-* **Ecosystem Growth:** By making bridging easier, we lower the barrier for users to bring liquidity into the Stellar and L2 ecosystems.
+```bash
+# development
+$ npm run start
 
----
+# watch mode
+$ npm run start:dev
 
-## 🛠 Project Structure (Monorepo)
+# production mode
+$ npm run start:prod
+```
 
-```text
-BridgeWise/
-├── apps/
-│   └── docs/          # Interactive documentation & UI Playground
-├── libs/
-│   ├── bridge-core/   # Core logic for route discovery and API calls
-│   └── ui-components/ # The actual React/Vue library components
-├── packages/
-│   └── adapters/      # Specific logic for Stellar, LayerZero, and Hop
-├── .gitignore         # Standard Node.js/Rust exclusions
-└── LICENSE            # MIT Licensed
+## Run tests
+
+```bash
+# unit tests
+$ npm run test
+
+# e2e tests
+$ npm run test:e2e
+
+# test coverage
+$ npm run test:cov
+```
+
+## Deployment
+
+When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+
+If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+
+```bash
+$ npm install -g @nestjs/mau
+$ mau deploy
+```
+
+With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+
+## Resources
+
+Check out a few resources that may come in handy when working with NestJS:
+
+- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
+- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
+- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
+- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
+- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
+- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
+- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
+- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+
+## Support
+
+Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+
+## Stay in touch
+
+- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
+- Website - [https://nestjs.com](https://nestjs.com/)
+- Twitter - [@nestframework](https://twitter.com/nestframework)
+
+## License
+
+Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
