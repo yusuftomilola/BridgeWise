@@ -1,21 +1,29 @@
 {
   "name": "@bridgewise/bridge-core",
   "version": "0.1.0",
-  "description": "Core logic for route discovery and API calls for BridgeWise",
+  "description": "Core aggregation logic for multi-chain bridge route discovery",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsc --watch",
+    "test": "jest"
   },
-  "keywords": [],
+  "keywords": [
+    "bridge",
+    "cross-chain",
+    "stellar",
+    "layerzero",
+    "hop",
+    "defi"
+  ],
   "author": "",
   "license": "MIT",
-  "devDependencies": {
-    "@types/opossum": "^8.1.9",
-    "typescript": "^5.0.0"
-  },
   "dependencies": {
-    "opossum": "^9.0.0"
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0"
   }
 }
