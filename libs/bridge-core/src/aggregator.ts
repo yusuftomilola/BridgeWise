@@ -2,8 +2,9 @@ import { BridgeAdapter } from './adapters/base';
 import { HopAdapter } from './adapters/hop';
 import { LayerZeroAdapter } from './adapters/layerzero';
 import { StellarAdapter } from './adapters/stellar';
-import { RouteRequest, AggregatedRoutes, BridgeRoute, BridgeError } from './types';
+import { RouteRequest, AggregatedRoutes, BridgeRoute, NormalizedRoute, BridgeError } from './types';
 import { BridgeValidator, BridgeExecutionRequest, ValidationResult } from './validator';
+import { RouteRanker, RankingWeights, DEFAULT_RANKING_WEIGHTS } from './ranker';
 
 /**
  * Configuration for the bridge aggregator
@@ -21,6 +22,8 @@ export interface AggregatorConfig {
   adapters?: BridgeAdapter[];
   /** Request timeout in milliseconds (default: 15000) */
   timeout?: number;
+  /** Route ranking weights (default: balanced) */
+  rankingWeights?: RankingWeights;
 }
 
 /**
@@ -30,11 +33,13 @@ export class BridgeAggregator {
   private adapters: BridgeAdapter[];
   private readonly timeout: number;
   private readonly validator: BridgeValidator;
+  private readonly ranker: RouteRanker;
   
   constructor(config: AggregatorConfig = {}) {
     this.timeout = config.timeout || 15000;
     this.adapters = config.adapters || [];
     this.validator = new BridgeValidator();
+    this.ranker = new RouteRanker(config.rankingWeights);
     
     // Initialize default adapters if not provided
     if (this.adapters.length === 0) {
@@ -112,7 +117,7 @@ export class BridgeAggregator {
     
     // Normalize and sort routes
     const normalizedRoutes = this.normalizeRoutes(routes);
-    const sortedRoutes = this.sortRoutes(normalizedRoutes);
+    const sortedRoutes = this.ranker.rankRoutes(normalizedRoutes);
     
     return {
       routes: sortedRoutes,
@@ -140,19 +145,48 @@ export class BridgeAggregator {
   /**
    * Normalize routes to ensure consistent data format
    */
-  private normalizeRoutes(routes: BridgeRoute[]): BridgeRoute[] {
+  private normalizeRoutes(routes: BridgeRoute[]): NormalizedRoute[] {
     return routes.map((route, index) => {
-      // Ensure all required fields are present
-      const normalized: BridgeRoute = {
-        id: route.id || `route-${Date.now()}-${index}`,
-        provider: route.provider,
+      // For single-hop routes, create a hop from the route data
+      const hops = route.hops || [{
         sourceChain: route.sourceChain,
+        destinationChain: route.targetChain,
+        tokenIn: (route.metadata?.tokenIn as string) || 'native', // Default to native if not specified
+        tokenOut: (route.metadata?.tokenOut as string) || 'native',
+        fee: route.fee,
+        estimatedTime: route.estimatedTime,
+        adapter: route.provider,
+        metadata: route.metadata,
+      }];
+
+      // Aggregate total fees and estimated time from hops
+      const totalFees = hops.reduce((sum, hop) => {
+        try {
+          return (BigInt(sum) + BigInt(hop.fee)).toString();
+        } catch {
+          return sum;
+        }
+      }, '0');
+
+      const totalEstimatedTime = hops.reduce((sum, hop) => sum + hop.estimatedTime, 0);
+
+      const normalized: NormalizedRoute = {
+        id: route.id || `route-${Date.now()}-${index}`,
+        sourceChain: route.sourceChain,
+        destinationChain: route.targetChain,
+        tokenIn: hops[0].tokenIn,
+        tokenOut: hops[hops.length - 1].tokenOut,
+        totalFees,
+        estimatedTime: totalEstimatedTime,
+        hops,
+        adapter: route.provider,
         targetChain: route.targetChain,
         inputAmount: route.inputAmount || '0',
         outputAmount: route.outputAmount || '0',
         fee: route.fee || '0',
         feePercentage: route.feePercentage ?? 0,
         estimatedTime: route.estimatedTime ?? 0,
+        reliability: route.reliability ?? this.calculateReliability(route),
         minAmountOut: route.minAmountOut || route.outputAmount || '0',
         maxAmountOut: route.maxAmountOut || route.outputAmount || '0',
         deadline: route.deadline,
@@ -162,39 +196,40 @@ export class BridgeAggregator {
           normalized: true,
         },
       };
-      
-      // Recalculate fee percentage if needed
-      if (normalized.feePercentage === 0 && normalized.inputAmount !== '0') {
-        normalized.feePercentage = this.calculateFeePercentage(
-          normalized.inputAmount,
-          normalized.outputAmount
-        );
-      }
-      
+
       return normalized;
     });
   }
-  
+ 
   /**
-   * Sort routes by best option (lowest fee percentage, then fastest time)
+   * Sort routes deterministically: lowest totalFees, fastest ETA, fewest hops
    */
-  private sortRoutes(routes: BridgeRoute[]): BridgeRoute[] {
+  private sortRoutes(routes: NormalizedRoute[]): NormalizedRoute[] {
     return [...routes].sort((a, b) => {
-      // Primary sort: fee percentage (lower is better)
-      const feeDiff = a.feePercentage - b.feePercentage;
-      if (Math.abs(feeDiff) > 0.01) {
-        return feeDiff;
+      // Primary sort: lowest totalFees
+      try {
+        const feeDiff = BigInt(a.totalFees) - BigInt(b.totalFees);
+        if (feeDiff !== 0n) {
+          return feeDiff > 0n ? 1 : -1;
+        }
+      } catch {
+        // If fee comparison fails, continue to next criteria
       }
-      
-      // Secondary sort: estimated time (faster is better)
+
+      // Secondary sort: fastest ETA (lowest estimatedTime)
       const timeDiff = a.estimatedTime - b.estimatedTime;
       if (timeDiff !== 0) {
         return timeDiff;
       }
-      
-      // Tertiary sort: output amount (higher is better)
-      const outputDiff = BigInt(b.outputAmount) - BigInt(a.outputAmount);
-      return outputDiff > 0n ? 1 : outputDiff < 0n ? -1 : 0;
+
+      // Tertiary sort: fewest hops
+      const hopDiff = a.hops.length - b.hops.length;
+      if (hopDiff !== 0) {
+        return hopDiff;
+      }
+
+      // Stable sort: by id for deterministic ordering
+      return a.id.localeCompare(b.id);
     });
   }
   
@@ -215,6 +250,30 @@ export class BridgeAggregator {
     } catch {
       return 0;
     }
+  }
+  
+  /**
+   * Calculate reliability score based on provider and metadata
+   */
+  private calculateReliability(route: BridgeRoute): number {
+    // Base reliability by provider (can be adjusted based on real data)
+    const providerReliability: Record<string, number> = {
+      stellar: 0.95,  // High reliability for established protocol
+      layerzero: 0.90, // Good reliability
+      hop: 0.85,      // Slightly lower due to optimism-specific
+    };
+    
+    let reliability = providerReliability[route.provider] || 0.8;
+    
+    // Adjust based on risk level if available
+    if (route.metadata?.riskLevel) {
+      // Risk level 1-5, where 1 is safest
+      // Convert to reliability: risk 1 = 0.95, risk 5 = 0.75
+      const riskAdjustment = (6 - route.metadata.riskLevel) * 0.05;
+      reliability = Math.min(reliability, riskAdjustment);
+    }
+    
+    return Math.max(0, Math.min(1, reliability));
   }
   
   /**
@@ -253,16 +312,21 @@ export class BridgeAggregator {
    * @param request The original execution request
    * @returns Validation result with detailed error messages
    */
-  validateRoute(route: BridgeRoute, request: BridgeExecutionRequest): ValidationResult {
+  validateRoute(route: NormalizedRoute, request: BridgeExecutionRequest): ValidationResult {
     return this.validator.validateRoute(route, request);
   }
 
   /**
-   * Get compatible target chains for a source chain
-   * @param sourceChain The source chain
-   * @returns Array of compatible target chains
+   * Update ranking weights for route prioritization
    */
-  getCompatibleChains(sourceChain: string): string[] {
-    return this.validator.getCompatibleChains(sourceChain as any) || [];
+  updateRankingWeights(weights: Partial<RankingWeights>): void {
+    this.ranker.updateWeights(weights);
+  }
+
+  /**
+   * Get current ranking weights
+   */
+  getRankingWeights(): RankingWeights {
+    return this.ranker.getWeights();
   }
 }
