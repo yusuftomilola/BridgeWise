@@ -1,6 +1,6 @@
 /**
- * Envelope de respuesta unificado para todas las APIs
- * Sigue el esquema {success, data, error}
+ * Unified API response envelope for all endpoints
+ * Follows the schema {success, data, error}
  */
 export interface ApiResponse<T = unknown> {
   /**
@@ -9,72 +9,60 @@ export interface ApiResponse<T = unknown> {
   success: boolean;
 
   /**
-   * Datos de la respuesta en caso de éxito
+   * Response data on success
    */
   data?: T;
 
   /**
-   * Información del error en caso de fallo
+   * Error information on failure
    */
   error?: ApiError;
 
   /**
-   * Timestamp de la respuesta
+   * Response timestamp (ISO 8601)
    */
   timestamp: string;
 
   /**
-   * ID único de la solicitud para trazabilidad
+   * Unique request id for traceability
    */
   requestId: string;
 }
 
 /**
- * Estructura del error en la respuesta
+ * Error structure in the response
  */
 export interface ApiError {
-  /**
-   * Código de error tipado único
-   */
   code: string;
 
-  /**
-   * Mensaje descriptivo del error
-   */
   message: string;
 
-  /**
-   * Detalles adicionales del error (stack, metadata, etc)
-   */
   details?: Record<string, unknown>;
 
-  /**
-   * Tipo de error: BRIDGE, ADAPTER, VALIDATION, INTERNAL, etc
-   */
   type: ErrorType;
 }
 
 export enum ErrorType {
-  // Errores del Bridge
+  // Bridge errors
   BRIDGE = 'BRIDGE',
 
-  // Errores de Adapters
+  // Adapter errors
   ADAPTER_STELLAR = 'ADAPTER_STELLAR',
   ADAPTER_LAYERZERO = 'ADAPTER_LAYERZERO',
   ADAPTER_HOP = 'ADAPTER_HOP',
 
-  // Errores de validación
+  // Validation errors
   VALIDATION = 'VALIDATION',
 
-  // Errores internos
+  // Internal errors
   INTERNAL = 'INTERNAL',
 
-  // Errores de configuración
+  // Configuration errors
   CONFIG = 'CONFIG',
 
-  // Errores externos (third-party APIs)
+  // External errors (third-party APIs)
   EXTERNAL = 'EXTERNAL',
 
-  // Errores de autenticación/autorización
+  // Authentication/authorization errors
   AUTH = 'AUTH',
 }

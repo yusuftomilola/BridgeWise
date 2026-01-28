@@ -3,7 +3,7 @@ import { ApiError, ErrorType } from '../types/api-response.interface';
 import { ErrorCode } from '../constants/error-codes';
 
 /**
- * Excepción base personalizada para todas las excepciones de la aplicación
+ * Base custom exception for all application exceptions
  */
 export class AppException extends HttpException {
   constructor(
@@ -15,7 +15,7 @@ export class AppException extends HttpException {
 }
 
 /**
- * Excepción para errores de validación
+ * Exception for validation errors
  */
 export class ValidationException extends AppException {
   constructor(code: ErrorCode, message: string, details?: Record<string, unknown>) {
@@ -30,7 +30,7 @@ export class ValidationException extends AppException {
 }
 
 /**
- * Excepción para errores del Bridge
+ * Exception for Bridge-related errors
  */
 export class BridgeException extends AppException {
   constructor(code: ErrorCode, message: string, details?: Record<string, unknown>) {
@@ -45,7 +45,7 @@ export class BridgeException extends AppException {
 }
 
 /**
- * Excepción para errores del Adapter Stellar
+ * Exception for Stellar adapter errors
  */
 export class StellarAdapterException extends AppException {
   constructor(code: ErrorCode, message: string, details?: Record<string, unknown>) {
@@ -60,7 +60,7 @@ export class StellarAdapterException extends AppException {
 }
 
 /**
- * Excepción para errores del Adapter LayerZero
+ * Exception for LayerZero adapter errors
  */
 export class LayerZeroAdapterException extends AppException {
   constructor(code: ErrorCode, message: string, details?: Record<string, unknown>) {
@@ -75,7 +75,7 @@ export class LayerZeroAdapterException extends AppException {
 }
 
 /**
- * Excepción para errores del Adapter Hop
+ * Exception for Hop adapter errors
  */
 export class HopAdapterException extends AppException {
   constructor(code: ErrorCode, message: string, details?: Record<string, unknown>) {
@@ -90,7 +90,7 @@ export class HopAdapterException extends AppException {
 }
 
 /**
- * Excepción para errores de autenticación/autorización
+ * Exception for authentication/authorization errors
  */
 export class AuthException extends AppException {
   constructor(
@@ -110,7 +110,7 @@ export class AuthException extends AppException {
 }
 
 /**
- * Excepción para errores externos (third-party APIs)
+ * Exception for external service (third-party API) errors
  */
 export class ExternalServiceException extends AppException {
   constructor(code: ErrorCode, message: string, details?: Record<string, unknown>) {
@@ -125,7 +125,7 @@ export class ExternalServiceException extends AppException {
 }
 
 /**
- * Excepción para errores de configuración
+ * Exception for configuration errors
  */
 export class ConfigException extends AppException {
   constructor(code: ErrorCode, message: string, details?: Record<string, unknown>) {
@@ -140,7 +140,7 @@ export class ConfigException extends AppException {
 }
 
 /**
- * Función auxiliar para mapear HttpException a AppException
+ * Helper function to map Nest's HttpException to AppException
  */
 export function mapHttpExceptionToAppException(
   exception: HttpException,

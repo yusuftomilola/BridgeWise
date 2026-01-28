@@ -7,36 +7,35 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  // ===== CONFIGURAR VALIDACIÓN GLOBAL =====
+  // ===== CONFIGURE GLOBAL VALIDATION =====
   app.useGlobalPipes(
     new ValidationPipe({
-      // Eliminar propiedades no declaradas en DTO
+      // Strip properties that are not defined in the DTO
       whitelist: true,
-      // Lanzar error si hay propiedades no declaradas
+      // Throw an error when unknown properties are present
       forbidNonWhitelisted: true,
-      // Transformar objetos planos a instancias de clases DTO
+      // Transform plain objects into DTO instances
       transform: true,
-      // Transformar tipos primitivos (string -> number, etc)
+      // Enable implicit primitive type conversion (e.g., string -> number)
       transformOptions: {
         enableImplicitConversion: true,
       },
-      // Mostrar errores de validación detallados
+      // Use 400 for validation errors
       errorHttpStatusCode: 400,
     }),
   );
 
-  // ===== HABILITAR CORS =====
+  // ===== ENABLE CORS =====
   app.enableCors({
-    origin: process.env.CORS_ORIGIN || '*',
+    origin: configService.get('CORS_ORIGIN') || '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
 
-  // ===== AGREGAR MIDDLEWARE PARA GENERAR REQUEST ID =====
-  app.use((req: any, res: any, next: any) => {
-    req.id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    next();
-  });
+  // ===== REQUEST ID MIDDLEWARE =====
+  // Use dedicated RequestIdMiddleware to set req.id and response header
+  const { RequestIdMiddleware } = await import('./common/middleware/request-id.middleware');
+  app.use((req, res, next) => new RequestIdMiddleware().use(req, res, next));
 
   await app.listen(configService.get('server').port);
   console.log(`✅ Application is running on port ${configService.get('server').port}`);
