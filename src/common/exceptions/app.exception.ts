@@ -18,7 +18,11 @@ export class AppException extends HttpException {
  * Exception for validation errors
  */
 export class ValidationException extends AppException {
-  constructor(code: ErrorCode, message: string, details?: Record<string, unknown>) {
+  constructor(
+    code: ErrorCode,
+    message: string,
+    details?: Record<string, unknown>,
+  ) {
     const apiError: ApiError = {
       code,
       message,
@@ -33,7 +37,11 @@ export class ValidationException extends AppException {
  * Exception for Bridge-related errors
  */
 export class BridgeException extends AppException {
-  constructor(code: ErrorCode, message: string, details?: Record<string, unknown>) {
+  constructor(
+    code: ErrorCode,
+    message: string,
+    details?: Record<string, unknown>,
+  ) {
     const apiError: ApiError = {
       code,
       message,
@@ -48,7 +56,11 @@ export class BridgeException extends AppException {
  * Exception for Stellar adapter errors
  */
 export class StellarAdapterException extends AppException {
-  constructor(code: ErrorCode, message: string, details?: Record<string, unknown>) {
+  constructor(
+    code: ErrorCode,
+    message: string,
+    details?: Record<string, unknown>,
+  ) {
     const apiError: ApiError = {
       code,
       message,
@@ -63,7 +75,11 @@ export class StellarAdapterException extends AppException {
  * Exception for LayerZero adapter errors
  */
 export class LayerZeroAdapterException extends AppException {
-  constructor(code: ErrorCode, message: string, details?: Record<string, unknown>) {
+  constructor(
+    code: ErrorCode,
+    message: string,
+    details?: Record<string, unknown>,
+  ) {
     const apiError: ApiError = {
       code,
       message,
@@ -78,7 +94,11 @@ export class LayerZeroAdapterException extends AppException {
  * Exception for Hop adapter errors
  */
 export class HopAdapterException extends AppException {
-  constructor(code: ErrorCode, message: string, details?: Record<string, unknown>) {
+  constructor(
+    code: ErrorCode,
+    message: string,
+    details?: Record<string, unknown>,
+  ) {
     const apiError: ApiError = {
       code,
       message,
@@ -113,7 +133,11 @@ export class AuthException extends AppException {
  * Exception for external service (third-party API) errors
  */
 export class ExternalServiceException extends AppException {
-  constructor(code: ErrorCode, message: string, details?: Record<string, unknown>) {
+  constructor(
+    code: ErrorCode,
+    message: string,
+    details?: Record<string, unknown>,
+  ) {
     const apiError: ApiError = {
       code,
       message,
@@ -128,7 +152,11 @@ export class ExternalServiceException extends AppException {
  * Exception for configuration errors
  */
 export class ConfigException extends AppException {
-  constructor(code: ErrorCode, message: string, details?: Record<string, unknown>) {
+  constructor(
+    code: ErrorCode,
+    message: string,
+    details?: Record<string, unknown>,
+  ) {
     const apiError: ApiError = {
       code,
       message,

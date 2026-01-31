@@ -45,6 +45,7 @@ export class StellarBridgeExecutor {
     transfer: BridgeTransactionDetails,
     options: TransferOptions = {}
   ): Promise<TransferExecutionResult> {
+    const startTime = Date.now();
     try {
       this.walletConnection = this.wallet.getConnection();
       if (!this.walletConnection || !this.walletConnection.isConnected) {
@@ -69,6 +70,20 @@ export class StellarBridgeExecutor {
       const signedTx = await this.wallet.signTransaction(JSON.stringify(preparedTx));
       const result = await this.bridgeContract.submitBridgeTransfer(signedTx.signature);
 
+      // Log successful execution (without sensitive data)
+      console.log(JSON.stringify({
+        eventType: 'BRIDGE_TRANSFER',
+        timestamp: new Date().toISOString(),
+        metadata: {
+          adapter: 'stellar',
+          sourceChain: transfer.sourceChain,
+          targetChain: transfer.targetChain,
+          txHash: result.transactionHash.slice(0, 8) + '...' + result.transactionHash.slice(-8),
+          status: 'confirmed',
+          executionTimeMs: Date.now() - startTime,
+        }
+      }));
+
       return {
         success: true,
         transactionHash: result.transactionHash,
@@ -76,6 +91,21 @@ export class StellarBridgeExecutor {
       };
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
+      
+      // Log failed execution
+      console.log(JSON.stringify({
+        eventType: 'BRIDGE_TRANSFER',
+        timestamp: new Date().toISOString(),
+        metadata: {
+          adapter: 'stellar',
+          sourceChain: transfer.sourceChain,
+          targetChain: transfer.targetChain,
+          status: 'failed',
+          errorCode: error instanceof Error ? error.name : 'UNKNOWN_ERROR',
+          executionTimeMs: Date.now() - startTime,
+        }
+      }));
+      
       return {
         success: false,
         error: msg,

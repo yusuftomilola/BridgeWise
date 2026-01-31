@@ -11,7 +11,7 @@ import type { Theme, DeepPartial } from '../types';
  */
 function deepMerge<T extends Record<string, any>>(
   target: T,
-  source: Record<string, any>
+  source: Record<string, any>,
 ): T {
   const output: any = { ...target };
 

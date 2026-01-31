@@ -1,6 +1,6 @@
 /**
  * Example usage of @bridgewise/bridge-core
- * 
+ *
  * This file demonstrates how to use the bridge aggregation library
  * to fetch and compare routes from multiple bridge providers.
  */
@@ -12,16 +12,18 @@ import { getBridgeRoutes, BridgeAggregator, BridgeValidator } from './index';
  */
 async function exampleSimple() {
   console.log('=== Example 1: Simple Route Discovery ===\n');
-  
+
   const routes = await getBridgeRoutes({
     sourceChain: 'ethereum',
     targetChain: 'polygon',
     assetAmount: '1000000000000000000', // 1 ETH in wei
     slippageTolerance: 0.5,
   });
-  
-  console.log(`Found ${routes.routes.length} routes from ${routes.providersResponded}/${routes.providersQueried} providers\n`);
-  
+
+  console.log(
+    `Found ${routes.routes.length} routes from ${routes.providersResponded}/${routes.providersQueried} providers\n`,
+  );
+
   routes.routes.forEach((route, index) => {
     console.log(`Route ${index + 1}: ${route.adapter}`);
     console.log(`  Total Fees: ${route.totalFees}`);
@@ -38,10 +40,10 @@ async function exampleSimple() {
  */
 async function exampleValidation() {
   console.log('=== Example 2: Validation Before Bridge Execution ===\n');
-  
+
   const aggregator = new BridgeAggregator();
   const validator = new BridgeValidator();
-  
+
   // Prepare execution request with user details
   const executionRequest = {
     sourceChain: 'ethereum' as const,
@@ -52,22 +54,22 @@ async function exampleValidation() {
     tokenAllowance: '0', // No allowance
     connectedChain: 'ethereum' as const,
   };
-  
+
   // Validate the request before fetching routes
   const validationResult = aggregator.validateRequest(executionRequest);
-  
+
   if (!validationResult.isValid) {
     console.log('Validation Failed:');
-    validationResult.errors.forEach(error => {
+    validationResult.errors.forEach((error) => {
       console.log(`  ❌ [${error.code}] ${error.message}`);
     });
   } else {
     console.log('✅ Validation passed! Safe to proceed with route fetching.');
   }
-  
+
   if (validationResult.warnings.length > 0) {
     console.log('\nWarnings:');
-    validationResult.warnings.forEach(warning => {
+    validationResult.warnings.forEach((warning) => {
       console.log(`  ⚠️  [${warning.code}] ${warning.message}`);
     });
   }
@@ -78,7 +80,7 @@ async function exampleValidation() {
  */
 async function exampleAdvanced() {
   console.log('=== Example 3: Advanced Configuration ===\n');
-  
+
   const aggregator = new BridgeAggregator({
     providers: {
       hop: true,
@@ -88,7 +90,7 @@ async function exampleAdvanced() {
     // layerZeroApiKey: process.env.LAYERZERO_API_KEY, // Optional
     timeout: 20000, // 20 seconds
   });
-  
+
   const routes = await aggregator.getRoutes({
     sourceChain: 'stellar',
     targetChain: 'ethereum',
@@ -97,7 +99,7 @@ async function exampleAdvanced() {
     slippageTolerance: 1.0,
     recipientAddress: '0x...', // Optional recipient
   });
-  
+
   if (routes.routes.length > 0) {
     const bestRoute = routes.routes[0];
     console.log(`Best Route: ${bestRoute.adapter}`);
@@ -114,21 +116,21 @@ async function exampleAdvanced() {
  */
 async function exampleRouteValidation() {
   console.log('=== Example 4: Route Validation Before Execution ===\n');
-  
+
   const aggregator = new BridgeAggregator();
-  
+
   // Get routes
   const routes = await aggregator.getRoutes({
     sourceChain: 'ethereum',
     targetChain: 'polygon',
     assetAmount: '1000000000000000000',
   });
-  
+
   if (routes.routes.length === 0) {
     console.log('No routes available');
     return;
   }
-  
+
   const selectedRoute = routes.routes[0];
   const executionRequest = {
     sourceChain: 'ethereum' as const,
@@ -139,9 +141,12 @@ async function exampleRouteValidation() {
     tokenAllowance: '1000000000000000000',
     connectedChain: 'ethereum' as const,
   };
-  
+
   // Validate the selected route
-  const routeValidation = aggregator.validateRoute(selectedRoute, executionRequest);
+  const routeValidation = aggregator.validateRoute(
+    selectedRoute,
+    executionRequest,
+  );
 
   if (routeValidation.isValid) {
     console.log('✅ Route validated successfully!');
@@ -149,7 +154,7 @@ async function exampleRouteValidation() {
     console.log(`Total Fees: ${selectedRoute.totalFees}`);
   } else {
     console.log('❌ Route validation failed:');
-    routeValidation.errors.forEach(error => {
+    routeValidation.errors.forEach((error) => {
       console.log(`  [${error.code}] ${error.message}`);
     });
   }
@@ -160,19 +165,21 @@ async function exampleRouteValidation() {
  */
 async function exampleFiltering() {
   console.log('=== Example 5: Filtering Routes ===\n');
-  
+
   const routes = await getBridgeRoutes({
     sourceChain: 'arbitrum',
     targetChain: 'optimism',
     assetAmount: '500000000000000000', // 0.5 ETH
   });
-  
+
   // Filter routes with total fees < 0.01 (assuming wei units)
-  const lowFeeRoutes = routes.routes.filter(route => BigInt(route.totalFees) < BigInt('10000000000000000')); // 0.01 ETH in wei
+  const lowFeeRoutes = routes.routes.filter(
+    (route) => BigInt(route.totalFees) < BigInt('10000000000000000'),
+  ); // 0.01 ETH in wei
   console.log(`Routes with low fees: ${lowFeeRoutes.length}`);
 
   // Filter routes with time < 5 minutes
-  const fastRoutes = routes.routes.filter(route => route.estimatedTime < 300);
+  const fastRoutes = routes.routes.filter((route) => route.estimatedTime < 300);
   console.log(`Routes faster than 5 minutes: ${fastRoutes.length}`);
 
   // Find route with fewest hops
@@ -180,7 +187,9 @@ async function exampleFiltering() {
     return current.hops.length < best.hops.length ? current : best;
   }, routes.routes[0]);
 
-  console.log(`Simplest route: ${simplestRoute.adapter} with ${simplestRoute.hops.length} hops`);
+  console.log(
+    `Simplest route: ${simplestRoute.adapter} with ${simplestRoute.hops.length} hops`,
+  );
 }
 
 // Run examples (commented out to avoid execution during build)

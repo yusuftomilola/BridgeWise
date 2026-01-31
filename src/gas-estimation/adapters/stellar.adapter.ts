@@ -27,18 +27,16 @@ export class StellarAdapter {
     for (let attempt = 1; attempt <= this.retryAttempts; attempt++) {
       try {
         const response = await firstValueFrom(
-          this.httpService
-            .get(`${this.baseUrl}/fee_stats`)
-            .pipe(
-              timeout(this.timeoutMs),
-              catchError((error) => {
-                this.logger.error(
-                  `Stellar API error (attempt ${attempt}/${this.retryAttempts}):`,
-                  error.message,
-                );
-                throw error;
-              }),
-            ),
+          this.httpService.get(`${this.baseUrl}/fee_stats`).pipe(
+            timeout(this.timeoutMs),
+            catchError((error) => {
+              this.logger.error(
+                `Stellar API error (attempt ${attempt}/${this.retryAttempts}):`,
+                error.message,
+              );
+              throw error;
+            }),
+          ),
         );
 
         return this.transformResponse(response.data);
@@ -48,7 +46,7 @@ export class StellarAdapter {
             `Stellar provider unavailable after ${this.retryAttempts} attempts: ${error.message}`,
           );
         }
-        
+
         // Exponential backoff
         await this.delay(Math.pow(2, attempt) * 100);
       }

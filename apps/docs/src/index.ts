@@ -6,8 +6,8 @@ const stellarProvider: BridgeProvider = {
 };
 
 const layerZeroProvider: BridgeProvider = {
-    name: 'LayerZero',
-    apiUrl: 'https://layerzero-bridge.example.com/api',
+  name: 'LayerZero',
+  apiUrl: 'https://layerzero-bridge.example.com/api',
 };
 
 async function main() {
@@ -19,21 +19,21 @@ async function main() {
       payload: { amount: 100, asset: 'USDC' },
     });
     console.log('Response:', response);
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
 
   console.log('\n--- Simulating API calls to LayerZero ---');
   for (let i = 0; i < 10; i++) {
     console.log(`\nRequest #${i + 1}`);
     const response = await callApi({
-        provider: layerZeroProvider,
-        payload: { amount: 100, asset: 'USDC' },
+      provider: layerZeroProvider,
+      payload: { amount: 100, asset: 'USDC' },
     });
     console.log('Response:', response);
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
   }
 }
 
-main().catch(error => {
+main().catch((error) => {
   console.error('An unexpected error occurred:', error);
 });

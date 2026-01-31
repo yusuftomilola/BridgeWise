@@ -13,7 +13,7 @@ export class ConfigService {
 
   private createConfig(): AppConfig {
     const nodeEnv = (process.env.NODE_ENV || 'development') as Environment;
-    
+
     const baseConfig = {
       nodeEnv,
       database: {
@@ -22,10 +22,12 @@ export class ConfigService {
         username: process.env.DB_USERNAME || 'postgres',
         password: process.env.DB_PASSWORD || '',
         database: process.env.DB_NAME || 'bridgewise',
-        ssl: nodeEnv === 'production' ? (process.env.DB_SSL === 'true') : false,
+        ssl: nodeEnv === 'production' ? process.env.DB_SSL === 'true' : false,
       },
       rpc: {
-        ethereum: process.env.RPC_ETHEREUM || 'https://mainnet.infura.io/v3/YOUR_PROJECT_ID',
+        ethereum:
+          process.env.RPC_ETHEREUM ||
+          'https://mainnet.infura.io/v3/YOUR_PROJECT_ID',
         polygon: process.env.RPC_POLYGON || 'https://polygon-rpc.com',
         bsc: process.env.RPC_BSC || 'https://bsc-dataseed.binance.org',
         arbitrum: process.env.RPC_ARBITRUM || 'https://arb1.arbitrum.io/rpc',
@@ -41,12 +43,19 @@ export class ConfigService {
         port: parseInt(process.env.PORT || '3000', 10),
         host: process.env.HOST || '0.0.0.0',
         cors: {
-          origin: this.parseCorsOrigins(process.env.CORS_ORIGIN || 'http://localhost:3000'),
+          origin: this.parseCorsOrigins(
+            process.env.CORS_ORIGIN || 'http://localhost:3000',
+          ),
           credentials: process.env.CORS_CREDENTIALS === 'true',
         },
       },
       logging: {
-        level: (process.env.LOG_LEVEL || 'info') as 'error' | 'warn' | 'info' | 'debug' | 'verbose',
+        level: (process.env.LOG_LEVEL || 'info') as
+          | 'error'
+          | 'warn'
+          | 'info'
+          | 'debug'
+          | 'verbose',
         format: (process.env.LOG_FORMAT || 'simple') as 'json' | 'simple',
       },
     };
@@ -54,7 +63,10 @@ export class ConfigService {
     return this.applyEnvironmentOverrides(baseConfig, nodeEnv);
   }
 
-  private applyEnvironmentOverrides(baseConfig: AppConfig, env: Environment): AppConfig {
+  private applyEnvironmentOverrides(
+    baseConfig: AppConfig,
+    env: Environment,
+  ): AppConfig {
     const overrides = this.getEnvironmentOverrides(env);
     return this.mergeConfigs(baseConfig, overrides);
   }
@@ -87,7 +99,10 @@ export class ConfigService {
     }
   }
 
-  private mergeConfigs(base: AppConfig, overrides: Partial<AppConfig>): AppConfig {
+  private mergeConfigs(
+    base: AppConfig,
+    overrides: Partial<AppConfig>,
+  ): AppConfig {
     return {
       ...base,
       ...overrides,
@@ -105,7 +120,7 @@ export class ConfigService {
 
   private parseCorsOrigins(origins: string): string | string[] {
     if (origins === '*') return '*';
-    return origins.split(',').map(origin => origin.trim());
+    return origins.split(',').map((origin) => origin.trim());
   }
 
   private validateConfig(): void {
@@ -114,10 +129,12 @@ export class ConfigService {
       { key: 'DB_PASSWORD', value: this.config.database.password },
     ];
 
-    const missing = requiredFields.filter(field => !field.value);
-    
+    const missing = requiredFields.filter((field) => !field.value);
+
     if (missing.length > 0) {
-      this.logger.warn(`Missing recommended environment variables: ${missing.map(f => f.key).join(', ')}`);
+      this.logger.warn(
+        `Missing recommended environment variables: ${missing.map((f) => f.key).join(', ')}`,
+      );
     }
 
     if (this.config.nodeEnv === 'production') {
@@ -126,10 +143,14 @@ export class ConfigService {
         { key: 'DB_PASSWORD', value: this.config.database.password },
       ];
 
-      const missingProduction = productionRequired.filter(field => !field.value);
-      
+      const missingProduction = productionRequired.filter(
+        (field) => !field.value,
+      );
+
       if (missingProduction.length > 0) {
-        throw new Error(`Missing required environment variables for production: ${missingProduction.map(f => f.key).join(', ')}`);
+        throw new Error(
+          `Missing required environment variables for production: ${missingProduction.map((f) => f.key).join(', ')}`,
+        );
       }
     }
   }

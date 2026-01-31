@@ -5,7 +5,11 @@
 
 import { StellarAdapter } from './stellar';
 import { MockStellarRpc } from './mock-rpc';
-import { BridgeErrorCode, ErrorMapper, STELLAR_ERROR_MAPPING } from '../error-codes';
+import {
+  BridgeErrorCode,
+  ErrorMapper,
+  STELLAR_ERROR_MAPPING,
+} from '../error-codes';
 import { StellarFees, LatencyEstimation } from '../fee-estimation';
 
 describe('StellarAdapter Integration Tests', () => {
@@ -29,7 +33,7 @@ describe('StellarAdapter Integration Tests', () => {
     adapter = new StellarAdapter(
       `http://localhost:${MOCK_RPC_PORT}`,
       `http://localhost:${MOCK_RPC_PORT}`,
-      'testnet'
+      'testnet',
     );
 
     // Reset mock state
@@ -62,7 +66,7 @@ describe('StellarAdapter Integration Tests', () => {
       expect(fees.bridgeFee).toBeGreaterThan(0n);
       // EVM to Stellar should have slightly higher bridge fee
       expect(fees.bridgeFee).toBeGreaterThan(
-        StellarFees.estimateFees(inputAmount, true, 0.5).bridgeFee
+        StellarFees.estimateFees(inputAmount, true, 0.5).bridgeFee,
       );
     });
 
@@ -73,7 +77,9 @@ describe('StellarAdapter Integration Tests', () => {
       expect(fees.networkFee).toBeGreaterThan(0n);
       expect(fees.bridgeFee).toBeGreaterThan(0n);
       expect(fees.slippageFee).toBeGreaterThan(0n);
-      expect(fees.totalFee).toBe(fees.networkFee + fees.bridgeFee + fees.slippageFee);
+      expect(fees.totalFee).toBe(
+        fees.networkFee + fees.bridgeFee + fees.slippageFee,
+      );
     });
 
     it('should respect slippage tolerance in fee calculations', () => {
@@ -82,8 +88,12 @@ describe('StellarAdapter Integration Tests', () => {
       const lowSlippageFees = StellarFees.estimateFees(inputAmount, true, 0.1);
       const highSlippageFees = StellarFees.estimateFees(inputAmount, true, 1.0);
 
-      expect(highSlippageFees.slippageFee).toBeGreaterThan(lowSlippageFees.slippageFee);
-      expect(highSlippageFees.totalFee).toBeGreaterThan(lowSlippageFees.totalFee);
+      expect(highSlippageFees.slippageFee).toBeGreaterThan(
+        lowSlippageFees.slippageFee,
+      );
+      expect(highSlippageFees.totalFee).toBeGreaterThan(
+        lowSlippageFees.totalFee,
+      );
     });
 
     it('should reject dust amounts', () => {
@@ -105,7 +115,10 @@ describe('StellarAdapter Integration Tests', () => {
       const outputAmount = 100000000n;
       const slippagePercentage = 0.5;
 
-      const minAmountOut = StellarFees.calculateMinAmountOut(outputAmount, slippagePercentage);
+      const minAmountOut = StellarFees.calculateMinAmountOut(
+        outputAmount,
+        slippagePercentage,
+      );
 
       expect(minAmountOut).toBeLessThan(outputAmount);
       expect(minAmountOut).toBeGreaterThan(0n);
@@ -128,18 +141,38 @@ describe('StellarAdapter Integration Tests', () => {
     });
 
     it('should estimate latency for Stellar to L2 chain bridge', () => {
-      const estimateL1 = LatencyEstimation.estimateLatency('stellar', 'ethereum');
-      const estimateL2 = LatencyEstimation.estimateLatency('stellar', 'optimism');
+      const estimateL1 = LatencyEstimation.estimateLatency(
+        'stellar',
+        'ethereum',
+      );
+      const estimateL2 = LatencyEstimation.estimateLatency(
+        'stellar',
+        'optimism',
+      );
 
-      expect(estimateL2.estimatedSeconds).toBeLessThan(estimateL1.estimatedSeconds);
+      expect(estimateL2.estimatedSeconds).toBeLessThan(
+        estimateL1.estimatedSeconds,
+      );
     });
 
     it('should account for network load in latency estimation', () => {
-      const lowLoadEstimate = LatencyEstimation.estimateLatency('stellar', 'ethereum', 0.1);
-      const highLoadEstimate = LatencyEstimation.estimateLatency('stellar', 'ethereum', 0.9);
+      const lowLoadEstimate = LatencyEstimation.estimateLatency(
+        'stellar',
+        'ethereum',
+        0.1,
+      );
+      const highLoadEstimate = LatencyEstimation.estimateLatency(
+        'stellar',
+        'ethereum',
+        0.9,
+      );
 
-      expect(highLoadEstimate.estimatedSeconds).toBeGreaterThan(lowLoadEstimate.estimatedSeconds);
-      expect(highLoadEstimate.confidence).toBeLessThan(lowLoadEstimate.confidence);
+      expect(highLoadEstimate.estimatedSeconds).toBeGreaterThan(
+        lowLoadEstimate.estimatedSeconds,
+      );
+      expect(highLoadEstimate.confidence).toBeLessThan(
+        lowLoadEstimate.confidence,
+      );
     });
 
     it('should provide detailed breakdown of latency components', () => {
@@ -199,7 +232,9 @@ describe('StellarAdapter Integration Tests', () => {
 
     it('should map sequence mismatch errors', () => {
       const errorMapper = new ErrorMapper(STELLAR_ERROR_MAPPING);
-      const error = new Error('tx_bad_seq: Transaction sequence number is too high');
+      const error = new Error(
+        'tx_bad_seq: Transaction sequence number is too high',
+      );
 
       const mapped = errorMapper.mapError(error);
 
@@ -339,7 +374,9 @@ describe('StellarAdapter Integration Tests', () => {
 
       expect(routes.length).toBeGreaterThan(0);
       const route = routes[0];
-      expect(BigInt(route.minAmountOut)).toBeLessThan(BigInt(route.outputAmount));
+      expect(BigInt(route.minAmountOut)).toBeLessThan(
+        BigInt(route.outputAmount),
+      );
     });
   });
 
@@ -355,7 +392,7 @@ describe('StellarAdapter Integration Tests', () => {
       const startTime = Date.now();
       const adapterWithLatency = new StellarAdapter(
         `http://localhost:${MOCK_RPC_PORT + 1}`,
-        `http://localhost:${MOCK_RPC_PORT + 1}`
+        `http://localhost:${MOCK_RPC_PORT + 1}`,
       );
 
       // This would make an RPC call through the adapter

@@ -53,15 +53,96 @@ const CHAIN_PROPERTIES: Record<ChainId, { name: string; isEVM: boolean }> = {
  * Chain bridge compatibility map - tracks which chains can bridge to which
  */
 const CHAIN_COMPATIBILITY: Record<ChainId, ChainId[]> = {
-  ethereum: ['polygon', 'arbitrum', 'optimism', 'base', 'gnosis', 'nova', 'bsc', 'avalanche'],
-  polygon: ['ethereum', 'arbitrum', 'optimism', 'base', 'gnosis', 'nova', 'bsc', 'avalanche'],
-  arbitrum: ['ethereum', 'polygon', 'optimism', 'base', 'gnosis', 'nova', 'bsc', 'avalanche'],
-  optimism: ['ethereum', 'polygon', 'arbitrum', 'base', 'gnosis', 'nova', 'bsc', 'avalanche'],
-  base: ['ethereum', 'polygon', 'arbitrum', 'optimism', 'gnosis', 'nova', 'bsc', 'avalanche'],
-  gnosis: ['ethereum', 'polygon', 'arbitrum', 'optimism', 'base', 'nova', 'bsc', 'avalanche'],
-  nova: ['ethereum', 'polygon', 'arbitrum', 'optimism', 'base', 'gnosis', 'bsc', 'avalanche'],
-  bsc: ['ethereum', 'polygon', 'arbitrum', 'optimism', 'base', 'gnosis', 'nova', 'avalanche'],
-  avalanche: ['ethereum', 'polygon', 'arbitrum', 'optimism', 'base', 'gnosis', 'nova', 'bsc'],
+  ethereum: [
+    'polygon',
+    'arbitrum',
+    'optimism',
+    'base',
+    'gnosis',
+    'nova',
+    'bsc',
+    'avalanche',
+  ],
+  polygon: [
+    'ethereum',
+    'arbitrum',
+    'optimism',
+    'base',
+    'gnosis',
+    'nova',
+    'bsc',
+    'avalanche',
+  ],
+  arbitrum: [
+    'ethereum',
+    'polygon',
+    'optimism',
+    'base',
+    'gnosis',
+    'nova',
+    'bsc',
+    'avalanche',
+  ],
+  optimism: [
+    'ethereum',
+    'polygon',
+    'arbitrum',
+    'base',
+    'gnosis',
+    'nova',
+    'bsc',
+    'avalanche',
+  ],
+  base: [
+    'ethereum',
+    'polygon',
+    'arbitrum',
+    'optimism',
+    'gnosis',
+    'nova',
+    'bsc',
+    'avalanche',
+  ],
+  gnosis: [
+    'ethereum',
+    'polygon',
+    'arbitrum',
+    'optimism',
+    'base',
+    'nova',
+    'bsc',
+    'avalanche',
+  ],
+  nova: [
+    'ethereum',
+    'polygon',
+    'arbitrum',
+    'optimism',
+    'base',
+    'gnosis',
+    'bsc',
+    'avalanche',
+  ],
+  bsc: [
+    'ethereum',
+    'polygon',
+    'arbitrum',
+    'optimism',
+    'base',
+    'gnosis',
+    'nova',
+    'avalanche',
+  ],
+  avalanche: [
+    'ethereum',
+    'polygon',
+    'arbitrum',
+    'optimism',
+    'base',
+    'gnosis',
+    'nova',
+    'bsc',
+  ],
   stellar: [], // Stellar is non-EVM and has limited bridge partners
 };
 
@@ -80,7 +161,7 @@ export class BridgeValidator {
     // Validate chain compatibility
     const chainCompatErrors = this.validateChainCompatibility(
       request.sourceChain,
-      request.targetChain
+      request.targetChain,
     );
     errors.push(...chainCompatErrors);
 
@@ -97,15 +178,18 @@ export class BridgeValidator {
     // Validate user balance
     const balanceErrors = this.validateBalance(
       request.assetAmount,
-      request.userBalance
+      request.userBalance,
     );
     errors.push(...balanceErrors);
 
     // Validate token allowance (for EVM chains with non-native tokens)
-    if (CHAIN_PROPERTIES[request.sourceChain].isEVM && request.tokenAllowance !== undefined) {
+    if (
+      CHAIN_PROPERTIES[request.sourceChain].isEVM &&
+      request.tokenAllowance !== undefined
+    ) {
       const allowanceErrors = this.validateAllowance(
         request.assetAmount,
-        request.tokenAllowance
+        request.tokenAllowance,
       );
       errors.push(...allowanceErrors);
     }
@@ -126,7 +210,7 @@ export class BridgeValidator {
    */
   private validateChainCompatibility(
     sourceChain: ChainId,
-    targetChain: ChainId
+    targetChain: ChainId,
   ): ValidationError[] {
     const errors: ValidationError[] = [];
 
@@ -159,7 +243,10 @@ export class BridgeValidator {
   /**
    * Validate user has sufficient balance
    */
-  private validateBalance(requiredAmount: string, userBalance: string): ValidationError[] {
+  private validateBalance(
+    requiredAmount: string,
+    userBalance: string,
+  ): ValidationError[] {
     const errors: ValidationError[] = [];
 
     try {
@@ -178,7 +265,8 @@ export class BridgeValidator {
     } catch {
       errors.push({
         code: 'INVALID_AMOUNT_FORMAT',
-        message: 'Invalid balance or required amount format. Expected numeric strings.',
+        message:
+          'Invalid balance or required amount format. Expected numeric strings.',
         field: 'userBalance',
         severity: 'error',
       });
@@ -190,7 +278,10 @@ export class BridgeValidator {
   /**
    * Validate token allowance is sufficient
    */
-  private validateAllowance(requiredAmount: string, allowance: string): ValidationError[] {
+  private validateAllowance(
+    requiredAmount: string,
+    allowance: string,
+  ): ValidationError[] {
     const errors: ValidationError[] = [];
 
     try {
@@ -259,7 +350,10 @@ export class BridgeValidator {
   /**
    * Validate a selected route before execution
    */
-  validateRoute(route: NormalizedRoute, request: BridgeExecutionRequest): ValidationResult {
+  validateRoute(
+    route: NormalizedRoute,
+    request: BridgeExecutionRequest,
+  ): ValidationResult {
     const errors: ValidationError[] = [];
     const warnings: ValidationError[] = [];
 
@@ -300,7 +394,8 @@ export class BridgeValidator {
       } else if (deadline - now < 60) {
         warnings.push({
           code: 'ROUTE_EXPIRING_SOON',
-          message: 'This route will expire soon. Execute quickly to avoid expiration.',
+          message:
+            'This route will expire soon. Execute quickly to avoid expiration.',
           field: 'deadline',
           severity: 'warning',
         });

@@ -27,7 +27,7 @@ describe('RouteRanker', () => {
       fee: '30000000000000000', // 0.03 ETH fee
       feePercentage: 3.0,
       estimatedTime: 600, // 10 minutes
-      reliability: 0.90,
+      reliability: 0.9,
       minAmountOut: '970000000000000000',
       maxAmountOut: '970000000000000000',
     },
@@ -64,17 +64,23 @@ describe('RouteRanker', () => {
     });
 
     it('should throw error for invalid weights', () => {
-      expect(() => new RouteRanker({
-        costWeight: 0.5,
-        latencyWeight: 0.3,
-        reliabilityWeight: 0.3, // Sum > 1
-      })).toThrow('Ranking weights must sum to 1');
+      expect(
+        () =>
+          new RouteRanker({
+            costWeight: 0.5,
+            latencyWeight: 0.3,
+            reliabilityWeight: 0.3, // Sum > 1
+          }),
+      ).toThrow('Ranking weights must sum to 1');
 
-      expect(() => new RouteRanker({
-        costWeight: 1.5, // > 1
-        latencyWeight: 0,
-        reliabilityWeight: -0.5, // < 0
-      })).toThrow('costWeight must be between 0 and 1');
+      expect(
+        () =>
+          new RouteRanker({
+            costWeight: 1.5, // > 1
+            latencyWeight: 0,
+            reliabilityWeight: -0.5, // < 0
+          }),
+      ).toThrow('costWeight must be between 0 and 1');
     });
   });
 

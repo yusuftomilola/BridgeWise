@@ -6,7 +6,6 @@ const CIRCUIT_BREAKER_OPEN_DURATION_MS = 60000; // 1 minute
 const RETRY_ATTEMPTS = 3;
 const RETRY_DELAY_MS = 1000;
 
-
 // In-memory store for circuit breakers.
 const breakers = new Map<string, opossum>();
 
@@ -19,14 +18,22 @@ function getBreaker(providerName: string): opossum {
       rollingCountTimeout: 10000,
       rollingCountBuckets: 10,
       name: providerName,
-      group: 'Bridge-Providers'
+      group: 'Bridge-Providers',
     };
     const breaker = new opossum(mockApiCall, options);
     //
-    breaker.on('open', () => console.log(`[${providerName}] Circuit breaker opened.`));
-    breaker.on('halfOpen', () => console.log(`[${providerName}] Circuit breaker is half-open.`));
-    breaker.on('close', () => console.log(`[${providerName}] Circuit breaker closed.`));
-    breaker.on('fallback', (result: any) => console.log(`[${providerName}] Fallback executed with result:`, result));
+    breaker.on('open', () =>
+      console.log(`[${providerName}] Circuit breaker opened.`),
+    );
+    breaker.on('halfOpen', () =>
+      console.log(`[${providerName}] Circuit breaker is half-open.`),
+    );
+    breaker.on('close', () =>
+      console.log(`[${providerName}] Circuit breaker closed.`),
+    );
+    breaker.on('fallback', (result: any) =>
+      console.log(`[${providerName}] Fallback executed with result:`, result),
+    );
 
     breakers.set(providerName, breaker);
   }
@@ -60,23 +67,24 @@ export async function callApi(request: ApiRequest): Promise<ApiResponse> {
  * This will be replaced with actual `fetch` calls.
  */
 async function mockApiCall(request: ApiRequest): Promise<any> {
-    console.log(`Calling API for provider: ${request.provider.name}`);
-    
-    if (request.provider.name === 'stellar') {
-        // Consistently fail for Stellar to test circuit breaker
-        const err: any = new Error('Transient failure');
-        err.code = 'TRANSIENT_ERROR';
-        throw err;
-    }
+  console.log(`Calling API for provider: ${request.provider.name}`);
 
-    // LayerZero will have random failures
-    if (Math.random() > 0.5) {
-        return { message: "Success!" };
-    } else {
-        const isTransient = Math.random() > 0.3;
-        const err: any = new Error(isTransient ? "Transient failure" : "Permanent failure");
-        err.isTransient = isTransient;
-        throw err;
-    }
+  if (request.provider.name === 'stellar') {
+    // Consistently fail for Stellar to test circuit breaker
+    const err: any = new Error('Transient failure');
+    err.code = 'TRANSIENT_ERROR';
+    throw err;
+  }
+
+  // LayerZero will have random failures
+  if (Math.random() > 0.5) {
+    return { message: 'Success!' };
+  } else {
+    const isTransient = Math.random() > 0.3;
+    const err: any = new Error(
+      isTransient ? 'Transient failure' : 'Permanent failure',
+    );
+    err.isTransient = isTransient;
+    throw err;
+  }
 }
-

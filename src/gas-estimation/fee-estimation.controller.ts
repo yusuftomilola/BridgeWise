@@ -5,12 +5,7 @@ import {
   HttpStatus,
   HttpException,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 import { FeeEstimationService } from './fee-estimation.service';
 import { NetworkType } from './interfaces/fees.interface';
 
@@ -218,7 +213,10 @@ export class FeeEstimationController {
                 token: { type: 'string', example: 'USDC' },
                 sourceChain: { type: 'string', example: 'ethereum' },
                 destinationChain: { type: 'string', example: 'polygon' },
-                lpFee: { type: 'string', description: 'Liquidity provider fee' },
+                lpFee: {
+                  type: 'string',
+                  description: 'Liquidity provider fee',
+                },
                 bonderFee: { type: 'string', description: 'Bonder fee' },
               },
               description: 'Hop Protocol bridge-specific data',

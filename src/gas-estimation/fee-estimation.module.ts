@@ -7,6 +7,7 @@ import { TokenService } from './token.service';
 import { StellarAdapter } from './adapters/stellar.adapter';
 import { LayerZeroAdapter } from './adapters/layerzero.adapter';
 import { HopAdapter } from './adapters/hop.adapter';
+import { AuditLoggerService } from '../common/logger/audit-logger.service';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { HopAdapter } from './adapters/hop.adapter';
     StellarAdapter,
     LayerZeroAdapter,
     HopAdapter,
+    AuditLoggerService,
   ],
   exports: [FeeEstimationService],
 })

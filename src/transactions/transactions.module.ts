@@ -1,11 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Transaction } from './entities/transaction.entity';
 import { TransactionController } from './transactions.controller';
 import { TransactionService } from './transactions.service';
+import { AuditLoggerService } from '../common/logger/audit-logger.service';
 
 @Module({
   imports: [
@@ -13,6 +12,6 @@ import { TransactionService } from './transactions.service';
     EventEmitterModule.forRoot(),
   ],
   controllers: [TransactionController],
-  providers: [TransactionService],
+  providers: [TransactionService, AuditLoggerService],
 })
 export class TransactionsModule {}

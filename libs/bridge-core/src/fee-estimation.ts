@@ -50,22 +50,32 @@ export namespace StellarFees {
   /**
    * Calculate network fee for Stellar transactions
    */
-  export function calculateNetworkFee(operationCount: bigint = TYPICAL_TX_SIZE): bigint {
+  export function calculateNetworkFee(
+    operationCount: bigint = TYPICAL_TX_SIZE,
+  ): bigint {
     return BASE_OPERATION_FEE * operationCount;
   }
 
   /**
    * Calculate bridge protocol fee based on direction and amount
    */
-  export function calculateBridgeFee(amount: bigint, isFromStellar: boolean): bigint {
-    const feeBp = isFromStellar ? STELLAR_TO_EVM_BRIDGE_FEE_BP : EVM_TO_STELLAR_BRIDGE_FEE_BP;
+  export function calculateBridgeFee(
+    amount: bigint,
+    isFromStellar: boolean,
+  ): bigint {
+    const feeBp = isFromStellar
+      ? STELLAR_TO_EVM_BRIDGE_FEE_BP
+      : EVM_TO_STELLAR_BRIDGE_FEE_BP;
     return (amount * feeBp) / 10000n;
   }
 
   /**
    * Calculate slippage fee
    */
-  export function calculateSlippageFee(amount: bigint, slippagePercentage: number): bigint {
+  export function calculateSlippageFee(
+    amount: bigint,
+    slippagePercentage: number,
+  ): bigint {
     const slippageBp = BigInt(Math.floor(slippagePercentage * 100));
     return (amount * slippageBp) / 10000n;
   }
@@ -77,16 +87,18 @@ export namespace StellarFees {
     inputAmount: bigint,
     isFromStellar: boolean,
     slippagePercentage: number = 0.5,
-    operationCount: bigint = TYPICAL_TX_SIZE
+    operationCount: bigint = TYPICAL_TX_SIZE,
   ): FeeEstimate {
     const networkFee = calculateNetworkFee(operationCount);
     const bridgeFee = calculateBridgeFee(inputAmount, isFromStellar);
-    const slippageFee = calculateSlippageFee(inputAmount - bridgeFee, slippagePercentage);
+    const slippageFee = calculateSlippageFee(
+      inputAmount - bridgeFee,
+      slippagePercentage,
+    );
     const totalFee = networkFee + bridgeFee + slippageFee;
 
-    const feePercentage = inputAmount > 0n
-      ? Number((totalFee * 10000n) / inputAmount) / 100
-      : 0;
+    const feePercentage =
+      inputAmount > 0n ? Number((totalFee * 10000n) / inputAmount) / 100 : 0;
 
     return {
       networkFee,
@@ -100,7 +112,10 @@ export namespace StellarFees {
   /**
    * Validate amount is not dust
    */
-  export function isValidAmount(amount: bigint, isStellarAmount: boolean): boolean {
+  export function isValidAmount(
+    amount: bigint,
+    isStellarAmount: boolean,
+  ): boolean {
     const minAmount = isStellarAmount ? MIN_STELLAR_AMOUNT : MIN_EVM_AMOUNT;
     return amount >= minAmount;
   }
@@ -110,7 +125,7 @@ export namespace StellarFees {
    */
   export function calculateMinAmountOut(
     outputAmount: bigint,
-    slippagePercentage: number
+    slippagePercentage: number,
   ): bigint {
     const slippageBp = BigInt(Math.floor(slippagePercentage * 100));
     const slippageAmount = (outputAmount * slippageBp) / 10000n;
@@ -156,7 +171,7 @@ export namespace LatencyEstimation {
   export function estimateLatency(
     sourceChain: string,
     targetChain: string,
-    baseLoad: number = 0.5 // 0-1 scale, network congestion
+    baseLoad: number = 0.5, // 0-1 scale, network congestion
   ): LatencyEstimate {
     const sourceLatency = getNetworkLatency(sourceChain);
     const targetLatency = getNetworkLatency(targetChain);
@@ -166,11 +181,16 @@ export namespace LatencyEstimation {
     // Adjust for network load
     const loadFactor = 1 + baseLoad * 0.5; // Up to 50% additional latency under load
 
-    const networkLatency = Math.ceil((sourceLatency + targetLatency) * loadFactor);
-    const confirmationTime = Math.ceil((sourceConfirmation + targetConfirmation) * loadFactor);
+    const networkLatency = Math.ceil(
+      (sourceLatency + targetLatency) * loadFactor,
+    );
+    const confirmationTime = Math.ceil(
+      (sourceConfirmation + targetConfirmation) * loadFactor,
+    );
     const bridgeProcessing = Math.ceil(BRIDGE_PROCESSING_BASE * loadFactor);
 
-    const estimatedSeconds = networkLatency + confirmationTime + bridgeProcessing;
+    const estimatedSeconds =
+      networkLatency + confirmationTime + bridgeProcessing;
     const confidence = Math.max(40, 95 - Math.floor(baseLoad * 30)); // Confidence decreases with load
 
     return {

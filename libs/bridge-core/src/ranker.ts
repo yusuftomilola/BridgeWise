@@ -74,7 +74,7 @@ export class RouteRanker {
     // Clamp fee percentage to reasonable range
     const clamped = Math.max(0, Math.min(100, feePercentage));
     // Invert so lower fee = higher score
-    return 1 - (clamped / 100);
+    return 1 - clamped / 100;
   }
 
   /**
@@ -93,7 +93,10 @@ export class RouteRanker {
    * Validate that weights sum to 1
    */
   private validateWeights(): void {
-    const sum = this.weights.costWeight + this.weights.latencyWeight + this.weights.reliabilityWeight;
+    const sum =
+      this.weights.costWeight +
+      this.weights.latencyWeight +
+      this.weights.reliabilityWeight;
     if (Math.abs(sum - 1) > 0.001) {
       throw new Error(`Ranking weights must sum to 1, got ${sum}`);
     }

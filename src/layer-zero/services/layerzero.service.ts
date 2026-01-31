@@ -26,7 +26,10 @@ export class LayerZeroService implements OnModuleInit {
   /**
    * Estimate fees for a LayerZero bridge transaction
    */
-  async estimateFees(route: BridgeRoute, payload: string): Promise<FeeEstimate> {
+  async estimateFees(
+    route: BridgeRoute,
+    payload: string,
+  ): Promise<FeeEstimate> {
     try {
       this.logger.debug(
         `Estimating fees for route: ${route.sourceChainId} -> ${route.destinationChainId}`,
@@ -43,8 +46,12 @@ export class LayerZeroService implements OnModuleInit {
       };
 
       // Simulate fee calculation based on chain and payload size
-      const baseFee = this.calculateBaseFee(route.sourceChainId, route.destinationChainId);
-      const payloadCost = Buffer.from(payload.replace('0x', ''), 'hex').length * 16;
+      const baseFee = this.calculateBaseFee(
+        route.sourceChainId,
+        route.destinationChainId,
+      );
+      const payloadCost =
+        Buffer.from(payload.replace('0x', ''), 'hex').length * 16;
       const nativeFee = (baseFee + payloadCost).toString();
 
       const feeEstimate: FeeEstimate = {
@@ -57,7 +64,10 @@ export class LayerZeroService implements OnModuleInit {
       this.logger.debug(`Fee estimate: ${JSON.stringify(feeEstimate)}`);
       return feeEstimate;
     } catch (error) {
-      this.logger.error(`Failed to estimate fees: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to estimate fees: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -141,8 +151,10 @@ export class LayerZeroService implements OnModuleInit {
       this.healthStatus.set(chainId, status);
       return status;
     } catch (error) {
-      this.logger.error(`Health check failed for chain ${chainId}: ${error.message}`);
-      
+      this.logger.error(
+        `Health check failed for chain ${chainId}: ${error.message}`,
+      );
+
       const status: HealthStatus = {
         isHealthy: false,
         endpoint,
@@ -175,7 +187,9 @@ export class LayerZeroService implements OnModuleInit {
   /**
    * Get cached health status
    */
-  getHealthStatus(chainId?: LayerZeroChainId): HealthStatus | HealthStatus[] | undefined {
+  getHealthStatus(
+    chainId?: LayerZeroChainId,
+  ): HealthStatus | HealthStatus[] | undefined {
     if (chainId) {
       return this.healthStatus.get(chainId);
     }
@@ -189,7 +203,7 @@ export class LayerZeroService implements OnModuleInit {
   private async initializeHealthChecks() {
     this.logger.log('Running initial health checks...');
     await this.checkAllHealth();
-    
+
     // Schedule periodic health checks every 60 seconds
     setInterval(() => {
       this.checkAllHealth().catch((error) => {
@@ -204,7 +218,7 @@ export class LayerZeroService implements OnModuleInit {
   ): number {
     // Base fees vary by chain combination
     const chainPairKey = `${sourceChain}-${destChain}`;
-    
+
     const baseFees = {
       [`${LayerZeroChainId.ETHEREUM}-${LayerZeroChainId.POLYGON}`]: 500000000000000, // 0.0005 ETH
       [`${LayerZeroChainId.ETHEREUM}-${LayerZeroChainId.ARBITRUM}`]: 300000000000000, // 0.0003 ETH
@@ -238,7 +252,10 @@ export class LayerZeroService implements OnModuleInit {
 
     // Confidence based on how well-tested the route is
     let confidence: 'low' | 'medium' | 'high' = 'medium';
-    if (sourceChain === LayerZeroChainId.ETHEREUM || destChain === LayerZeroChainId.ETHEREUM) {
+    if (
+      sourceChain === LayerZeroChainId.ETHEREUM ||
+      destChain === LayerZeroChainId.ETHEREUM
+    ) {
       confidence = 'high'; // Well-established routes
     }
 
@@ -249,7 +266,10 @@ export class LayerZeroService implements OnModuleInit {
     };
   }
 
-  private async convertToUsd(weiAmount: string, chainId: LayerZeroChainId): Promise<number> {
+  private async convertToUsd(
+    weiAmount: string,
+    chainId: LayerZeroChainId,
+  ): Promise<number> {
     // In production, fetch real-time prices from an oracle or price feed
     const mockPrices = {
       [LayerZeroChainId.ETHEREUM]: 2000, // ETH price
@@ -272,7 +292,8 @@ export class LayerZeroService implements OnModuleInit {
       [LayerZeroChainId.ETHEREUM]: '0x66A71Dcef29A0fFBDBE3c6a460a3B5BC225Cd675',
       [LayerZeroChainId.BSC]: '0x3c2269811836af69497E5F486A85D7316753cf62',
       [LayerZeroChainId.POLYGON]: '0x3c2269811836af69497E5F486A85D7316753cf62',
-      [LayerZeroChainId.AVALANCHE]: '0x3c2269811836af69497E5F486A85D7316753cf62',
+      [LayerZeroChainId.AVALANCHE]:
+        '0x3c2269811836af69497E5F486A85D7316753cf62',
       [LayerZeroChainId.ARBITRUM]: '0x3c2269811836af69497E5F486A85D7316753cf62',
       [LayerZeroChainId.OPTIMISM]: '0x3c2269811836af69497E5F486A85D7316753cf62',
       [LayerZeroChainId.FANTOM]: '0xb6319cC6c8c27A8F5dAF0dD3DF91EA35C4720dd7',
@@ -285,7 +306,7 @@ export class LayerZeroService implements OnModuleInit {
     // Simulate endpoint check with random delay
     const delay = Math.random() * 1000 + 500;
     await new Promise((resolve) => setTimeout(resolve, delay));
-    
+
     // Simulate occasional failures (5% chance)
     if (Math.random() < 0.05) {
       throw new Error('Endpoint unreachable');

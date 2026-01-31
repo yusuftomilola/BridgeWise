@@ -10,7 +10,8 @@ export class AppController {
   @Get()
   @ApiOperation({
     summary: 'Health check endpoint',
-    description: 'Returns a simple health check message indicating the API is operational',
+    description:
+      'Returns a simple health check message indicating the API is operational',
   })
   @ApiResponse({
     status: 200,

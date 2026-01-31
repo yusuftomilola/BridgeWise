@@ -65,7 +65,11 @@ export class ResponseInterceptor implements NestInterceptor {
     return uuidv4();
   }
 
-  private logSuccess(request: Request, response: Response, requestId: string): void {
+  private logSuccess(
+    request: Request,
+    response: Response,
+    requestId: string,
+  ): void {
     this.logger.debug(
       `${request.method} ${request.path} - ${response.statusCode}`,
       requestId,

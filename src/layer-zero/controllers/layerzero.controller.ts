@@ -72,7 +72,9 @@ export class LayerZeroController {
    */
   @Post('estimate/latency')
   @HttpCode(HttpStatus.OK)
-  async estimateLatency(@Body() dto: Omit<EstimateDto, 'payload'>): Promise<LatencyEstimate> {
+  async estimateLatency(
+    @Body() dto: Omit<EstimateDto, 'payload'>,
+  ): Promise<LatencyEstimate> {
     this.validateRouteDto(dto);
 
     const route: BridgeRoute = {
@@ -131,9 +133,13 @@ export class LayerZeroController {
       throw new BadRequestException(`Invalid chain ID: ${chainId}`);
     }
 
-    const status = this.layerZeroService.getHealthStatus(chainId as LayerZeroChainId);
+    const status = this.layerZeroService.getHealthStatus(
+      chainId as LayerZeroChainId,
+    );
     if (!status) {
-      throw new BadRequestException(`No health data available for chain ${chainId}`);
+      throw new BadRequestException(
+        `No health data available for chain ${chainId}`,
+      );
     }
 
     return status as HealthStatus;
@@ -145,15 +151,21 @@ export class LayerZeroController {
 
   private validateEstimateDto(dto: EstimateDto): void {
     if (!this.isValidChainId(dto.sourceChainId)) {
-      throw new BadRequestException(`Invalid source chain ID: ${dto.sourceChainId}`);
+      throw new BadRequestException(
+        `Invalid source chain ID: ${dto.sourceChainId}`,
+      );
     }
 
     if (!this.isValidChainId(dto.destinationChainId)) {
-      throw new BadRequestException(`Invalid destination chain ID: ${dto.destinationChainId}`);
+      throw new BadRequestException(
+        `Invalid destination chain ID: ${dto.destinationChainId}`,
+      );
     }
 
     if (dto.sourceChainId === dto.destinationChainId) {
-      throw new BadRequestException('Source and destination chains must be different');
+      throw new BadRequestException(
+        'Source and destination chains must be different',
+      );
     }
 
     if (!dto.tokenAddress || !dto.tokenAddress.match(/^0x[a-fA-F0-9]{40}$/)) {
@@ -161,21 +173,29 @@ export class LayerZeroController {
     }
 
     if (!dto.payload || !dto.payload.startsWith('0x')) {
-      throw new BadRequestException('Payload must be a hex string starting with 0x');
+      throw new BadRequestException(
+        'Payload must be a hex string starting with 0x',
+      );
     }
   }
 
   private validateRouteDto(dto: Omit<EstimateDto, 'payload'>): void {
     if (!this.isValidChainId(dto.sourceChainId)) {
-      throw new BadRequestException(`Invalid source chain ID: ${dto.sourceChainId}`);
+      throw new BadRequestException(
+        `Invalid source chain ID: ${dto.sourceChainId}`,
+      );
     }
 
     if (!this.isValidChainId(dto.destinationChainId)) {
-      throw new BadRequestException(`Invalid destination chain ID: ${dto.destinationChainId}`);
+      throw new BadRequestException(
+        `Invalid destination chain ID: ${dto.destinationChainId}`,
+      );
     }
 
     if (dto.sourceChainId === dto.destinationChainId) {
-      throw new BadRequestException('Source and destination chains must be different');
+      throw new BadRequestException(
+        'Source and destination chains must be different',
+      );
     }
 
     if (!dto.tokenAddress || !dto.tokenAddress.match(/^0x[a-fA-F0-9]{40}$/)) {

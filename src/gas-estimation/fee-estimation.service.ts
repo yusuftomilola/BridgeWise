@@ -2,8 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { StellarAdapter } from './adapters/stellar.adapter';
 import { LayerZeroAdapter } from './adapters/layerzero.adapter';
 import { HopAdapter } from './adapters/hop.adapter';
-import { FeeEstimate, NormalizedFeeData, NetworkType } from './interfaces/fees.interface';
+import {
+  FeeEstimate,
+  NormalizedFeeData,
+  NetworkType,
+} from './interfaces/fees.interface';
 import { TokenService } from './token.service';
+import { AuditLoggerService } from '../common/logger/audit-logger.service';
 
 @Injectable()
 export class FeeEstimationService {
@@ -14,6 +19,7 @@ export class FeeEstimationService {
     private readonly layerZeroAdapter: LayerZeroAdapter,
     private readonly hopAdapter: HopAdapter,
     private readonly tokenService: TokenService,
+    private readonly auditLogger: AuditLoggerService,
   ) {}
 
   /**
@@ -31,8 +37,11 @@ export class FeeEstimationService {
     const hopResult = this.extractResult(estimates[2], 'Hop');
 
     // Count only providers that are actually available
-    const successfulProviders = [stellarResult, layerzeroResult, hopResult]
-      .filter(result => result.available).length;
+    const successfulProviders = [
+      stellarResult,
+      layerzeroResult,
+      hopResult,
+    ].filter((result) => result.available).length;
 
     return {
       timestamp: Date.now(),
@@ -52,17 +61,35 @@ export class FeeEstimationService {
    * Get fee estimate for a specific network
    */
   async getFeeEstimate(network: NetworkType): Promise<FeeEstimate> {
+    const startTime = Date.now();
     try {
+      let result: FeeEstimate;
       switch (network) {
         case NetworkType.STELLAR:
-          return await this.getStellarFees();
+          result = await this.getStellarFees();
+          break;
         case NetworkType.LAYERZERO:
-          return await this.getLayerZeroFees();
+          result = await this.getLayerZeroFees();
+          break;
         case NetworkType.HOP:
-          return await this.getHopFees();
+          result = await this.getHopFees();
+          break;
         default:
           throw new Error(`Unsupported network: ${network}`);
       }
+
+      // Log successful fee estimation
+      if (result.available) {
+        this.auditLogger.logFeeEstimation({
+          adapter: network,
+          sourceChain: network,
+          destinationChain: network,
+          estimatedFee: result.fees?.standard || '0',
+          responseTimeMs: Date.now() - startTime,
+        });
+      }
+
+      return result;
     } catch (error) {
       this.logger.error(`Failed to fetch fees for ${network}:`, error.message);
       return this.createUnavailableEstimate(network, error.message);
@@ -75,7 +102,7 @@ export class FeeEstimationService {
   private async getStellarFees(): Promise<FeeEstimate> {
     try {
       const rawFees = await this.stellarAdapter.getFees();
-      
+
       return {
         network: NetworkType.STELLAR,
         available: true,
@@ -116,7 +143,7 @@ export class FeeEstimationService {
   private async getLayerZeroFees(): Promise<FeeEstimate> {
     try {
       const rawFees = await this.layerZeroAdapter.getFees();
-      
+
       return {
         network: NetworkType.LAYERZERO,
         available: true,
@@ -151,7 +178,10 @@ export class FeeEstimationService {
       };
     } catch (error) {
       this.logger.error('LayerZero adapter failed:', error.message);
-      return this.createUnavailableEstimate(NetworkType.LAYERZERO, error.message);
+      return this.createUnavailableEstimate(
+        NetworkType.LAYERZERO,
+        error.message,
+      );
     }
   }
 
@@ -161,7 +191,7 @@ export class FeeEstimationService {
   private async getHopFees(): Promise<FeeEstimate> {
     try {
       const rawFees = await this.hopAdapter.getFees();
-      
+
       return {
         network: NetworkType.HOP,
         available: true,
@@ -210,8 +240,11 @@ export class FeeEstimationService {
     if (result.status === 'fulfilled') {
       return result.value;
     }
-    
-    this.logger.warn(`${providerName} provider unavailable:`, result.reason?.message);
+
+    this.logger.warn(
+      `${providerName} provider unavailable:`,
+      result.reason?.message,
+    );
     return this.createUnavailableEstimate(
       providerName.toLowerCase() as NetworkType,
       result.reason?.message || 'Unknown error',

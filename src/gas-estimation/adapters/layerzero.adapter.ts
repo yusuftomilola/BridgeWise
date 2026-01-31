@@ -70,7 +70,7 @@ export class LayerZeroAdapter {
           this.logger.warn('Using LayerZero fallback values');
           return this.getFallbackFees(source, destination);
         }
-        
+
         await this.delay(Math.pow(2, attempt) * 100);
       }
     }

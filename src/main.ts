@@ -59,7 +59,9 @@ async function bootstrap() {
   );
 
   // ===== ENABLE CORS =====
-  const corsOrigin = configService.get('CORS_ORIGIN' as any) as string | undefined;
+  const corsOrigin = configService.get('CORS_ORIGIN' as any) as
+    | string
+    | undefined;
   app.enableCors({
     origin: corsOrigin || '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -71,7 +73,9 @@ async function bootstrap() {
   app.use((req, res, next) => new RequestIdMiddleware().use(req, res, next));
 
   await app.listen(configService.get('server').port);
-  console.log(`✅ Application is running on port ${configService.get('server').port}`);
+  console.log(
+    `✅ Application is running on port ${configService.get('server').port}`,
+  );
 }
 
 bootstrap().catch((err) => {

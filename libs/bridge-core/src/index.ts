@@ -1,6 +1,6 @@
 /**
  * @bridgewise/bridge-core
- * 
+ *
  * Central aggregation logic for multi-chain bridge route discovery.
  * Provides a unified interface to query routes from multiple bridge providers
  * including Stellar/Soroban, LayerZero, and Hop Protocol.
@@ -44,11 +44,11 @@ export type {
 
 /**
  * Main function to get aggregated bridge routes
- * 
+ *
  * @example
  * ```typescript
  * import { getBridgeRoutes } from '@bridgewise/bridge-core';
- * 
+ *
  * const routes = await getBridgeRoutes({
  *   sourceChain: 'ethereum',
  *   targetChain: 'polygon',
@@ -61,7 +61,7 @@ export type {
  *     reliabilityWeight: 0.2 // Consider reliability
  *   }
  * });
- * 
+ *
  * console.log(`Found ${routes.routes.length} routes`);
  * routes.routes.forEach(route => {
  *   console.log(`${route.provider}: ${route.feePercentage}% fee, ${route.estimatedTime}s, reliability: ${route.reliability}`);
@@ -79,7 +79,7 @@ export async function getBridgeRoutes(
     layerZeroApiKey?: string;
     timeout?: number;
     rankingWeights?: RankingWeights;
-  }
+  },
 ) {
   const aggregator = new BridgeAggregator(config);
   return aggregator.getRoutes(request);

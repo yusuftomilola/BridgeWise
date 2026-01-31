@@ -63,7 +63,8 @@ export class HopAdapter {
     private readonly hopService: HopService,
   ) {
     // Load configuration from environment variables
-    this.baseUrl = this.configService.get('api')?.baseUrl || 'https://api.hop.exchange';
+    this.baseUrl =
+      this.configService.get('api')?.baseUrl || 'https://api.hop.exchange';
     this.timeoutMs = this.configService.get('api')?.timeout || 5000;
     this.retryAttempts = 3; // Try up to 3 times
     this.defaultToken = 'USDC';
@@ -71,16 +72,13 @@ export class HopAdapter {
     this.defaultDestinationChain = 'arbitrum';
 
     // Initialize circuit breaker
-    this.circuitBreaker = new CircuitBreaker(
-      this.makeApiCall.bind(this),
-      {
-        timeout: this.timeoutMs,
-        errorThresholdPercentage: 50,
-        resetTimeout: 30000,
-        volumeThreshold: 5,
-        name: 'HopApiCircuitBreaker',
-      },
-    );
+    this.circuitBreaker = new CircuitBreaker(this.makeApiCall.bind(this), {
+      timeout: this.timeoutMs,
+      errorThresholdPercentage: 50,
+      resetTimeout: 30000,
+      volumeThreshold: 5,
+      name: 'HopApiCircuitBreaker',
+    });
 
     // Set up circuit breaker event listeners for monitoring
     this.setupCircuitBreakerEvents();
@@ -133,12 +131,15 @@ export class HopAdapter {
      */
     for (let attempt = 1; attempt <= this.retryAttempts; attempt++) {
       try {
-        this.logger.debug(`Fetching Hop fees (attempt ${attempt}/${this.retryAttempts})`, {
-          token: selectedToken,
-          source,
-          destination,
-          amount: bridgeAmount,
-        });
+        this.logger.debug(
+          `Fetching Hop fees (attempt ${attempt}/${this.retryAttempts})`,
+          {
+            token: selectedToken,
+            source,
+            destination,
+            amount: bridgeAmount,
+          },
+        );
 
         // Use circuit breaker to make the API call
         const response = await this.circuitBreaker.fire({
@@ -150,13 +151,12 @@ export class HopAdapter {
 
         // Normalize the response using our HopService
         const normalized = this.hopService.normalizeFees(response.data);
-        
+
         // Cache the successful response for future use
         this.hopService.setCachedQuote(request, normalized);
 
         this.logger.debug('Successfully fetched Hop fees', { normalized });
         return normalized;
-
       } catch (error) {
         this.logger.error(
           `Hop API error (attempt ${attempt}/${this.retryAttempts}):`,
@@ -182,7 +182,7 @@ export class HopAdapter {
      */
     this.logger.warn('Hop API failed, trying cache');
     const cachedQuote = this.hopService.getCachedQuote(request);
-    
+
     if (cachedQuote) {
       this.logger.log('Using cached Hop quote');
       return cachedQuote;
@@ -292,10 +292,10 @@ export class HopAdapter {
   /**
    * STEP 13: Helper - Delay Function
    * =================================
-   * 
+   *
    * Simple utility to wait for a specified time.
    * Used for exponential backoff between retries.
-   * 
+   *
    * @param ms - Milliseconds to wait
    */
   private delay(ms: number): Promise<void> {
@@ -305,10 +305,10 @@ export class HopAdapter {
   /**
    * STEP 14: Get Circuit Breaker Stats
    * ===================================
-   * 
+   *
    * Expose circuit breaker statistics for monitoring.
    * Useful for debugging and observability.
-   * 
+   *
    * @returns Circuit breaker statistics
    */
   getCircuitBreakerStats() {

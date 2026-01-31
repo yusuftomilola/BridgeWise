@@ -131,4 +131,4 @@ export const ALL_ERROR_CODES = {
   ...SYSTEM_ERROR_CODES,
 } as const;
 
-export type ErrorCode = typeof ALL_ERROR_CODES[keyof typeof ALL_ERROR_CODES];
+export type ErrorCode = (typeof ALL_ERROR_CODES)[keyof typeof ALL_ERROR_CODES];

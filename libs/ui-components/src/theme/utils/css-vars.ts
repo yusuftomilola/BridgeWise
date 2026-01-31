@@ -23,7 +23,7 @@ function camelToKebab(str: string): string {
 function flattenObject(
   obj: any,
   prefix: string = '',
-  result: CSSVariables = {}
+  result: CSSVariables = {},
 ): CSSVariables {
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {

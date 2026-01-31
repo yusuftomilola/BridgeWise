@@ -65,7 +65,9 @@ export class MockStellarRpc {
 
     // Check if we should simulate a failure
     if (this.shouldFail()) {
-      return this.sendError(res, -32603, 'Internal error', { requestId: this.requestCount });
+      return this.sendError(res, -32603, 'Internal error', {
+        requestId: this.requestCount,
+      });
     }
 
     // Route to specific handler
@@ -103,7 +105,8 @@ export class MockStellarRpc {
         id: '4294967296',
         pagingToken: '18446744073709551616',
         hash: 'a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3',
-        prevHash: 'b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2',
+        prevHash:
+          'b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2',
         sequence: 50000000,
         closedAt: new Date().toISOString(),
         totalCoins: '50000000000.0000000',
@@ -126,7 +129,8 @@ export class MockStellarRpc {
         id: ledgerId.toString(),
         pagingToken: ledgerId.toString(),
         hash: 'c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4c4',
-        prevHash: 'b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2',
+        prevHash:
+          'b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2',
         sequence: ledgerId,
         closedAt: new Date(Date.now() - 5000).toISOString(),
         totalCoins: '50000000000.0000000',
@@ -141,7 +145,8 @@ export class MockStellarRpc {
   }
 
   private handleGetAccount(res: Response, params: any): void {
-    const accountId = params?.[0] || 'GBRPYHIL2CI3WHZSRXUJOUPJMSUC3SM7DM7V4T5DYKU2QC34EHJQUHOG';
+    const accountId =
+      params?.[0] || 'GBRPYHIL2CI3WHZSRXUJOUPJMSUC3SM7DM7V4T5DYKU2QC34EHJQUHOG';
 
     // Simulate account not found for specific test addresses
     if (accountId.includes('NOTFOUND')) {
@@ -195,7 +200,9 @@ export class MockStellarRpc {
     const txXdr = params?.[0];
 
     if (!txXdr) {
-      return this.sendError(res, -32602, 'Invalid params', { message: 'Transaction XDR required' });
+      return this.sendError(res, -32602, 'Invalid params', {
+        message: 'Transaction XDR required',
+      });
     }
 
     // Simulate transaction submission
@@ -215,7 +222,9 @@ export class MockStellarRpc {
     const hash = params?.[0];
 
     if (!hash) {
-      return this.sendError(res, -32602, 'Invalid params', { message: 'Transaction hash required' });
+      return this.sendError(res, -32602, 'Invalid params', {
+        message: 'Transaction hash required',
+      });
     }
 
     res.json({
@@ -235,7 +244,9 @@ export class MockStellarRpc {
     const contractId = params?.[0];
 
     if (!contractId) {
-      return this.sendError(res, -32602, 'Invalid params', { message: 'Contract ID required' });
+      return this.sendError(res, -32602, 'Invalid params', {
+        message: 'Contract ID required',
+      });
     }
 
     // Simulate contract not found for specific test IDs
@@ -258,7 +269,9 @@ export class MockStellarRpc {
     const functionXdr = params?.[0];
 
     if (!functionXdr) {
-      return this.sendError(res, -32602, 'Invalid params', { message: 'Function XDR required' });
+      return this.sendError(res, -32602, 'Invalid params', {
+        message: 'Function XDR required',
+      });
     }
 
     // Simulate contract invocation
@@ -267,7 +280,8 @@ export class MockStellarRpc {
       result: {
         transactionHash:
           'f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4f4',
-        resultXdr: 'AAAACgAAAABmzWfcQvp/fwNcrvZs0HdWxvLAIDj51MhYnzYY2RQYAAAAZGF0YQ==',
+        resultXdr:
+          'AAAACgAAAABmzWfcQvp/fwNcrvZs0HdWxvLAIDj51MhYnzYY2RQYAAAAZGF0YQ==',
         status: 'PENDING',
       },
       id: 'test-request',
@@ -282,7 +296,8 @@ export class MockStellarRpc {
             id: '4294967296',
             paging_token: '4294967296',
             hash: 'a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3a3',
-            prev_hash: 'b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2',
+            prev_hash:
+              'b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2b2',
             sequence: 50000000,
             transaction_count: 100,
             operation_count: 500,
@@ -381,7 +396,12 @@ export class MockStellarRpc {
     return this.requestCount;
   }
 
-  private sendError(res: Response, code: number, message: string, data?: unknown): void {
+  private sendError(
+    res: Response,
+    code: number,
+    message: string,
+    data?: unknown,
+  ): void {
     res.status(200).json({
       jsonrpc: '2.0',
       error: {
@@ -412,7 +432,9 @@ export class MockStellarRpc {
   async start(): Promise<void> {
     return new Promise((resolve) => {
       this.server = this.app.listen(this.config.port, () => {
-        console.log(`[MockStellarRpc] Server running on port ${this.config.port}`);
+        console.log(
+          `[MockStellarRpc] Server running on port ${this.config.port}`,
+        );
         resolve();
       });
     });

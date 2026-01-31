@@ -9,7 +9,10 @@ import {
 import { Request, Response } from 'express';
 import { ApiResponse, ErrorType } from '../types/api-response.interface';
 import '../types/express-extend'; // Extend Express request types
-import { AppException, mapHttpExceptionToAppException } from '../exceptions/app.exception';
+import {
+  AppException,
+  mapHttpExceptionToAppException,
+} from '../exceptions/app.exception';
 import { v4 as uuidv4 } from 'uuid';
 
 /**
@@ -41,7 +44,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       httpStatus = exception.httpStatus;
       apiError = exception.apiError;
     } else if (exception instanceof HttpException) {
-      const mappedException = mapHttpExceptionToAppException(exception, requestId);
+      const mappedException = mapHttpExceptionToAppException(
+        exception,
+        requestId,
+      );
       httpStatus = mappedException.httpStatus;
       apiError = mappedException.apiError;
     } else if (exception instanceof Error) {
@@ -53,7 +59,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         details: {
           requestId,
           errorName: exception.name,
-          stack: process.env.NODE_ENV === 'development' ? exception.stack : undefined,
+          stack:
+            process.env.NODE_ENV === 'development'
+              ? exception.stack
+              : undefined,
         },
       };
     } else {

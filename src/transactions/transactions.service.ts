@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -8,6 +6,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { UpdateTransactionDto } from './dto/update-transaction.dto';
 import { Transaction, TransactionStatus } from './entities/transaction.entity';
+import { AuditLoggerService } from '../common/logger/audit-logger.service';
 
 @Injectable()
 export class TransactionService {
@@ -15,6 +14,7 @@ export class TransactionService {
     @InjectRepository(Transaction)
     private readonly transactionRepo: Repository<Transaction>,
     private readonly eventEmitter: EventEmitter2,
+    private readonly auditLogger: AuditLoggerService,
   ) {}
 
   async create(dto: CreateTransactionDto): Promise<Transaction> {
@@ -27,6 +27,13 @@ export class TransactionService {
     });
 
     const saved = await this.transactionRepo.save(transaction);
+
+    this.auditLogger.logTransactionCreated({
+      transactionId: saved.id,
+      type: saved.type,
+      totalSteps: saved.totalSteps,
+    });
+
     this.emitStateChange(saved);
     return saved;
   }
@@ -41,6 +48,7 @@ export class TransactionService {
 
   async update(id: string, dto: UpdateTransactionDto): Promise<Transaction> {
     const transaction = await this.findById(id);
+    const previousStatus = transaction.status;
 
     if (dto.status) transaction.status = dto.status;
     if (dto.state) transaction.state = { ...transaction.state, ...dto.state };
@@ -53,6 +61,16 @@ export class TransactionService {
     }
 
     const updated = await this.transactionRepo.save(transaction);
+
+    if (dto.status && previousStatus !== dto.status) {
+      this.auditLogger.logTransactionUpdated({
+        transactionId: updated.id,
+        previousStatus,
+        newStatus: updated.status,
+        currentStep: updated.currentStep,
+      });
+    }
+
     this.emitStateChange(updated);
     return updated;
   }

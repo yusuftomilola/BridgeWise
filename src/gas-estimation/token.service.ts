@@ -82,10 +82,8 @@ export class TokenService {
         new BigNumber(10).pow(decimals2),
       );
       const sum = normalized1.plus(normalized2);
-      
-      return sum
-        .multipliedBy(new BigNumber(10).pow(resultDecimals))
-        .toFixed(0);
+
+      return sum.multipliedBy(new BigNumber(10).pow(resultDecimals)).toFixed(0);
     } catch (error) {
       return '0';
     }

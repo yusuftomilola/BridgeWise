@@ -131,14 +131,18 @@ export const ENV_VALIDATION_SCHEMA: EnvValidationSchema = {
   },
 };
 
-export function validateEnvironment(env: Record<string, string | undefined>): void {
+export function validateEnvironment(
+  env: Record<string, string | undefined>,
+): void {
   const errors: string[] = [];
 
   for (const [key, schema] of Object.entries(ENV_VALIDATION_SCHEMA)) {
     const value = env[key];
 
     if (schema.required && !value) {
-      errors.push(`Missing required environment variable: ${key} (${schema.description})`);
+      errors.push(
+        `Missing required environment variable: ${key} (${schema.description})`,
+      );
       continue;
     }
 
@@ -147,7 +151,9 @@ export function validateEnvironment(env: Record<string, string | undefined>): vo
     }
 
     if (value && !validateType(value, schema.type)) {
-      errors.push(`Invalid type for ${key}: expected ${schema.type}, got ${typeof value}`);
+      errors.push(
+        `Invalid type for ${key}: expected ${schema.type}, got ${typeof value}`,
+      );
     }
   }
 

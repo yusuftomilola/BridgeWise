@@ -37,6 +37,4 @@ export {
   useTransaction,
 } from './components/TransactionHeartbeat';
 
-export type {
-  TransactionState,
-} from './components/TransactionHeartbeat';
+export type { TransactionState } from './components/TransactionHeartbeat';
