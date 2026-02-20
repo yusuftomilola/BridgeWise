@@ -23,6 +23,9 @@ export { StellarAdapter } from './adapters/stellar';
 // Fee Estimation
 export * from './fee-estimation';
 
+// Benchmarking
+export * from './benchmark';
+
 // Error Codes and Mapping
 export * from './error-codes';
 

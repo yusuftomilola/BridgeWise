@@ -38,3 +38,7 @@ export {
 } from './components/TransactionHeartbeat';
 
 export type { TransactionState } from './components/TransactionHeartbeat';
+
+// Hooks
+export { useFeeSlippageBenchmark } from './hooks/useFeeSlippageBenchmark';
+export type { FeeSlippageBenchmarkHookProps, FeeSlippageBenchmarkHookReturn } from './hooks/useFeeSlippageBenchmark';

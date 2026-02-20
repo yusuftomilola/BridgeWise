@@ -196,3 +196,33 @@ export interface ApiResponse {
     message: string;
   };
 }
+
+/**
+ * Fee and slippage benchmark data
+ */
+export interface FeeSlippageBenchmark {
+  /** Bridge name */
+  bridgeName: BridgeProvider;
+  /** Source chain identifier */
+  sourceChain: ChainId;
+  /** Destination chain identifier */
+  destinationChain: ChainId;
+  /** Token symbol or address */
+  token: string;
+  /** Average fee in token units */
+  avgFee: number;
+  /** Average slippage percentage */
+  avgSlippagePercent: number;
+  /** Timestamp of benchmark record */
+  timestamp: Date;
+  /** Minimum fee observed */
+  minFee?: number;
+  /** Maximum fee observed */
+  maxFee?: number;
+  /** Minimum slippage observed */
+  minSlippagePercent?: number;
+  /** Maximum slippage observed */
+  maxSlippagePercent?: number;
+  /** Sample size used for calculation */
+  sampleSize?: number;
+}

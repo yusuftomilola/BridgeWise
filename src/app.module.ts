@@ -5,6 +5,7 @@ import { ConfigModule } from './config/config.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TransactionsModule } from './transactions/transactions.module';
+import { BenchmarkModule } from './benchmark/benchmark.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 
@@ -12,6 +13,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
   imports: [
     ConfigModule,
     TransactionsModule,
+    BenchmarkModule,
     ThrottlerModule.forRoot([
       {
         ttl: 60000,
