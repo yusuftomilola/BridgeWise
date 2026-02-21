@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BridgeWise · Rate-Limited API Layer · Issue #64</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Syne:wght@700;800&display=swap');
+
+  :root {
+    --bg:      #0a0c0f;
+    --surface: #111318;
+    --card:    #161a21;
+    --border:  #1f2530;
+    --accent:  #00e5ff;
+    --green:   #00ff88;
+    --orange:  #ff8c00;
+    --red:     #ff3b5c;
+    --text:    #c8d0de;
+    --muted:   #4a5568;
+    --white:   #eef1f7;
+    --mono:    'IBM Plex Mono', monospace;
+    --sans:    'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 40px 24px 80px;
+  }
+
+  /* ── Layout ── */
+  .shell {
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  /* ── Header ── */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 28px;
+    margin-bottom: 40px;
+  }
+  .label {
+    font-size: 10px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-family: var(--sans);
+    font-size: clamp(26px, 5vw, 42px);
+    color: var(--white);
+    font-weight: 800;
+    line-height: 1.1;
+  }
+  h1 span { color: var(--accent); }
+  .subtitle { color: var(--muted); margin-top: 10px; font-size: 12px; max-width: 620px; }
+
+  /* ── Section headers ── */
+  h2 {
+    font-family: var(--sans);
+    font-size: 15px;
+    color: var(--white);
+    margin-bottom: 14px;
+    letter-spacing: .04em;
+  }
+  h2 .pill {
+    display: inline-block;
+    background: var(--accent);
+    color: var(--bg);
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    letter-spacing: .12em;
+    margin-left: 8px;
+    vertical-align: middle;
+    font-family: var(--mono);
+    font-weight: 600;
+  }
+
+  /* ── Grid ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 640px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* ── Card ── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+  .card-title {
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* ── Architecture diagram ── */
+  .arch {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    padding: 20px 0;
+  }
+  .arch-node {
+    flex-shrink: 0;
+    text-align: center;
+    width: 110px;
+  }
+  .arch-box {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 6px;
+    font-size: 10px;
+    color: var(--white);
+    background: var(--surface);
+    letter-spacing: .06em;
+    position: relative;
+  }
+  .arch-box.accent  { border-color: var(--accent);  color: var(--accent); }
+  .arch-box.green   { border-color: var(--green);   color: var(--green); }
+  .arch-box.orange  { border-color: var(--orange);  color: var(--orange); }
+  .arch-box.red     { border-color: var(--red);      color: var(--red); }
+  .arch-icon { font-size: 18px; margin-bottom: 4px; }
+  .arch-label { margin-top: 6px; font-size: 9px; color: var(--muted); letter-spacing: .1em; }
+  .arch-arrow {
+    flex-shrink: 0;
+    color: var(--muted);
+    font-size: 18px;
+    padding: 0 4px;
+    margin-bottom: 14px;
+  }
+
+  /* ── Metrics bar ── */
+  .metrics-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    text-align: center;
+  }
+  .metric-value {
+    font-family: var(--sans);
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1;
+  }
+  .metric-value.accent { color: var(--accent); }
+  .metric-value.green  { color: var(--green); }
+  .metric-value.orange { color: var(--orange); }
+  .metric-value.red    { color: var(--red); }
+  .metric-label { font-size: 9px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; margin-top: 4px; }
+
+  /* ── Log terminal ── */
+  .terminal {
+    background: #08090b;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    font-size: 11.5px;
+    max-height: 280px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+  }
+  .terminal::-webkit-scrollbar { width: 4px; }
+  .terminal::-webkit-scrollbar-track { background: transparent; }
+  .terminal::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .log-entry { margin-bottom: 4px; display: flex; gap: 10px; animation: fadeIn .25s ease; }
+  @keyframes fadeIn { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+  .log-ts  { color: var(--muted); flex-shrink: 0; }
+  .log-tag { flex-shrink: 0; font-weight: 600; }
+  .log-tag.ok      { color: var(--green); }
+  .log-tag.warn    { color: var(--orange); }
+  .log-tag.err     { color: var(--red); }
+  .log-tag.info    { color: var(--accent); }
+  .log-msg { color: var(--text); }
+
+  /* ── Scenario buttons ── */
+  .scenarios { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+  .btn {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 8px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    letter-spacing: .05em;
+    transition: border-color .15s, color .15s, background .15s;
+  }
+  .btn:hover { border-color: var(--accent); color: var(--white); background: #161d26; }
+  .btn.running { border-color: var(--orange); color: var(--orange); }
+  .btn.clear   { border-color: var(--muted); color: var(--muted); }
+  .btn.clear:hover { border-color: var(--red); color: var(--red); }
+
+  /* ── Circuit indicator ── */
+  .circuit-status {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  .dot.closed { background: var(--green); }
+  .dot.open   { background: var(--red); animation: none; }
+  .dot.half   { background: var(--orange); }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:.4;} }
+
+  /* ── Code block ── */
+  .code-block {
+    background: #08090b;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 14px 16px;
+    font-size: 11.5px;
+    overflow-x: auto;
+    margin-bottom: 14px;
+    white-space: pre;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .kw  { color: var(--accent); }
+  .st  { color: var(--green); }
+  .cm  { color: var(--muted); }
+  .nm  { color: #e8a87c; }
+
+  /* ── Config table ── */
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: .12em; color: var(--muted); padding: 0 0 8px; }
+  td { padding: 6px 0; border-top: 1px solid var(--border); font-size: 11.5px; vertical-align: top; }
+  td:first-child { color: var(--accent); width: 40%; }
+  td code { background: var(--surface); padding: 1px 5px; border-radius: 3px; font-size: 10.5px; }
+
+  /* ── Footer ── */
+  footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Header -->
+  <header>
+    <div class="label">MDTechLabs / BridgeWise · Issue #64</div>
+    <h1>Rate-Limited <span>API Layer</span><br>& Retry Mechanism</h1>
+    <p class="subtitle">Handles rate limits, transient failures, and API unreliability for bridge quotes, network fees, and liquidity data — without degrading UX.</p>
+  </header>
+
+  <!-- Architecture -->
+  <section class="card" style="margin-bottom:24px;">
+    <div class="card-title">Architecture Overview</div>
+    <div class="arch">
+      <div class="arch-node">
+        <div class="arch-box">
+          <div class="arch-icon">⚡</div>
+          Quote Refresh<br>#17
+        </div>
+        <div class="arch-label">CALLER</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-box accent">
+          <div class="arch-icon">🪣</div>
+          Token<br>Bucket
+        </div>
+        <div class="arch-label">RATE LIMITER</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-box orange">
+          <div class="arch-icon">📋</div>
+          Request<br>Queue
+        </div>
+        <div class="arch-label">CONCURRENCY</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-box red">
+          <div class="arch-icon">⚡</div>
+          Circuit<br>Breaker
+        </div>
+        <div class="arch-label">FAULT GUARD</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-box green">
+          <div class="arch-icon">🔄</div>
+          Retry +<br>Backoff
+        </div>
+        <div class="arch-label">RESILIENCE</div>
+      </div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-node">
+        <div class="arch-box">
+          <div class="arch-icon">🌐</div>
+          External<br>APIs
+        </div>
+        <div class="arch-label">UPSTREAM</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Simulator -->
+  <section>
+    <h2>Live Simulator <span class="pill">INTERACTIVE</span></h2>
+
+    <div class="metrics-row">
+      <div class="metric">
+        <div class="metric-value accent" id="m-total">0</div>
+        <div class="metric-label">Requests</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value green" id="m-success">0</div>
+        <div class="metric-label">Success</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value orange" id="m-retried">0</div>
+        <div class="metric-label">Retried</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value red" id="m-failed">0</div>
+        <div class="metric-label">Failed</div>
+      </div>
+      <div class="metric">
+        <div class="metric-value" id="m-rl" style="color:var(--accent)">0</div>
+        <div class="metric-label">Rate Limit Hits</div>
+      </div>
+      <div class="metric">
+        <div style="padding-top:4px;">
+          <div class="circuit-status">
+            <div class="dot closed" id="circuit-dot"></div>
+            <span id="circuit-label" style="color:var(--green);font-family:var(--sans);font-weight:700;font-size:13px;">CLOSED</span>
+          </div>
+        </div>
+        <div class="metric-label">Circuit</div>
+      </div>
+    </div>
+
+    <div class="scenarios">
+      <button class="btn" onclick="runScenario('normal')">▶ Normal Requests</button>
+      <button class="btn" onclick="runScenario('rate_limit')">⚠ Rate Limit (429)</button>
+      <button class="btn" onclick="runScenario('retry')">🔄 5xx → Retry → OK</button>
+      <button class="btn" onclick="runScenario('timeout')">⏱ Timeout Retry</button>
+      <button class="btn" onclick="runScenario('circuit')">⚡ Open Circuit</button>
+      <button class="btn" onclick="runScenario('burst')">💥 Burst (10 req)</button>
+      <button class="btn clear" onclick="clearLog()">✕ Clear</button>
+    </div>
+
+    <div class="terminal" id="log">
+      <div class="log-entry">
+        <span class="log-ts">00:00:00</span>
+        <span class="log-tag info">[READY]</span>
+        <span class="log-msg">BridgeWise Rate-Limited API Layer initialised. Select a scenario above.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Usage -->
+  <section style="margin-top:32px;">
+    <h2>Usage</h2>
+    <div class="code-block"><span class="cm">// 1. Import the shared client or domain helpers</span>
+<span class="kw">import</span> { fetchBridgeQuote, fetchNetworkFees, fetchLiquidityData } <span class="kw">from</span> <span class="st">'./rateLimitedApi.js'</span>;
+
+<span class="cm">// 2. Use exactly like before — rate limiting & retry are transparent</span>
+<span class="kw">const</span> quote = <span class="kw">await</span> <span class="nm">fetchBridgeQuote</span>({ fromChain: <span class="st">'eth'</span>, toChain: <span class="st">'arb'</span>, token: <span class="st">'USDC'</span>, amount: <span class="st">'1000'</span> });
+<span class="kw">const</span> fees  = <span class="kw">await</span> <span class="nm">fetchNetworkFees</span>(<span class="st">'ethereum'</span>);
+<span class="kw">const</span> liq   = <span class="kw">await</span> <span class="nm">fetchLiquidityData</span>({ pair: <span class="st">'USDC/ETH'</span> });
+
+<span class="cm">// 3. Or use the client directly for custom endpoints</span>
+<span class="kw">import</span> { sharedClient } <span class="kw">from</span> <span class="st">'./rateLimitedApi.js'</span>;
+
+<span class="kw">const</span> res = <span class="kw">await</span> sharedClient.<span class="nm">get</span>(<span class="st">'/api/slippage'</span>, {}, { group: <span class="st">'liquidity'</span> });
+<span class="kw">const</span> data = <span class="kw">await</span> res.<span class="nm">json</span>();
+
+<span class="cm">// 4. Inspect metrics anytime</span>
+console.<span class="nm">log</span>(sharedClient.<span class="nm">getMetrics</span>());
+<span class="cm">// { totalRequests: 42, successfulRequests: 40, retriedRequests: 5, rateLimitHits: 3, … }</span></div>
+  </section>
+
+  <!-- Config Reference -->
+  <section style="margin-top:32px;">
+    <h2>Configuration Reference</h2>
+    <div class="card">
+      <table>
+        <tr><th>Option</th><th>Default</th><th>Description</th></tr>
+        <tr><td>maxRetries</td><td><code>3</code></td><td>Maximum retry attempts per request</td></tr>
+        <tr><td>baseDelay</td><td><code>1000 ms</code></td><td>Base delay for exponential backoff</td></tr>
+        <tr><td>maxDelay</td><td><code>30 000 ms</code></td><td>Cap on computed backoff delay</td></tr>
+        <tr><td>jitter</td><td><code>true</code></td><td>Full jitter to avoid thundering herd</td></tr>
+        <tr><td>rateLimitPerSecond</td><td><code>5</code></td><td>Token bucket capacity per group</td></tr>
+        <tr><td>timeout</td><td><code>10 000 ms</code></td><td>AbortController timeout per request</td></tr>
+        <tr><td>retryStatusCodes</td><td><code>[429,500,502,503,504]</code></td><td>HTTP codes triggering a retry</td></tr>
+        <tr><td>concurrency</td><td><code>10</code></td><td>Max parallel in-flight requests (queue)</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <footer>
+    <span>MDTechLabs / BridgeWise · Issue #64 · Rate-Limited API Layer</span>
+    <span>rateLimitedApi.js · MIT</span>
+  </footer>
+</div>
+
+<script>
+// ── Simulator (self-contained, no actual network) ─────────────────────────────
+
+const metrics = { total: 0, success: 0, retried: 0, failed: 0, rl: 0, circuit: 'CLOSED' };
+let circuitOpen = false;
+let circuitFailures = 0;
+
+function ts() {
+  const d = new Date();
+  return [d.getHours(), d.getMinutes(), d.getSeconds()].map(n => String(n).padStart(2,'0')).join(':');
+}
+
+function log(tag, cls, msg) {
+  const el = document.getElementById('log');
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `<span class="log-ts">${ts()}</span><span class="log-tag ${cls}">[${tag}]</span><span class="log-msg">${msg}</span>`;
+  el.appendChild(entry);
+  el.scrollTop = el.scrollHeight;
+}
+
+function updateMetrics() {
+  document.getElementById('m-total').textContent   = metrics.total;
+  document.getElementById('m-success').textContent = metrics.success;
+  document.getElementById('m-retried').textContent = metrics.retried;
+  document.getElementById('m-failed').textContent  = metrics.failed;
+  document.getElementById('m-rl').textContent      = metrics.rl;
+
+  const dot   = document.getElementById('circuit-dot');
+  const label = document.getElementById('circuit-label');
+  dot.className = 'dot ' + (circuitOpen ? 'open' : 'closed');
+  label.textContent = circuitOpen ? 'OPEN' : 'CLOSED';
+  label.style.color = circuitOpen ? 'var(--red)' : 'var(--green)';
+}
+
+async function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function simulateRequest({ group = 'quotes', responses = ['ok'] } = {}) {
+  metrics.total++;
+  updateMetrics();
+
+  if (circuitOpen) {
+    metrics.failed++;
+    log('CIRCUIT', 'err', `group=${group} — circuit OPEN, request blocked immediately`);
+    updateMetrics();
+    return;
+  }
+
+  for (let i = 0; i < responses.length; i++) {
+    const r = responses[i];
+    if (i > 0) { metrics.retried++; updateMetrics(); }
+
+    await delay(120 + Math.random() * 80);
+
+    if (r === 'ok') {
+      metrics.success++;
+      circuitFailures = 0;
+      log('SUCCESS', 'ok', `group=${group} — 200 OK${i > 0 ? ` (after ${i} retr${i>1?'ies':'y'})` : ''}`);
+      updateMetrics();
+      return;
+    }
+    if (r === '429') {
+      metrics.rl++;
+      const backoff = 1200 + Math.random() * 800;
+      log('RATE-LMT', 'warn', `group=${group} — 429 Too Many Requests. Waiting ${Math.round(backoff)}ms (Retry-After)`);
+      updateMetrics();
+      await delay(backoff);
+      continue;
+    }
+    if (r === '503' || r === '500') {
+      const backoff = 600 * Math.pow(2, i);
+      log('RETRY', 'warn', `group=${group} — ${r} Server Error. Backoff ${Math.round(backoff)}ms (attempt ${i+1}/${responses.length})`);
+      await delay(backoff);
+      continue;
+    }
+    if (r === 'timeout') {
+      log('TIMEOUT', 'warn', `group=${group} — Request timed out after 8000ms. Retrying…`);
+      await delay(400);
+      continue;
+    }
+    if (r === 'fail') {
+      circuitFailures++;
+      if (circuitFailures >= 5) { circuitOpen = true; }
+      metrics.failed++;
+      log('FAILED', 'err', `group=${group} — all retries exhausted (circuit failures: ${circuitFailures}/5)`);
+      updateMetrics();
+      return;
+    }
+  }
+}
+
+const SCENARIOS = {
+  normal: async () => {
+    log('START', 'info', 'Scenario: Normal Requests — 3 parallel groups');
+    await Promise.all([
+      simulateRequest({ group: 'quotes',    responses: ['ok'] }),
+      simulateRequest({ group: 'fees',      responses: ['ok'] }),
+      simulateRequest({ group: 'liquidity', responses: ['ok'] }),
+    ]);
+  },
+  rate_limit: async () => {
+    log('START', 'info', 'Scenario: Rate Limited — server returns 429 with Retry-After');
+    await simulateRequest({ group: 'quotes', responses: ['429', '429', 'ok'] });
+  },
+  retry: async () => {
+    log('START', 'info', 'Scenario: 503 → 503 → 200 (exponential backoff)');
+    await simulateRequest({ group: 'quotes', responses: ['503', '503', 'ok'] });
+  },
+  timeout: async () => {
+    log('START', 'info', 'Scenario: Timeout → Timeout → Success');
+    await simulateRequest({ group: 'fees', responses: ['timeout', 'timeout', 'ok'] });
+  },
+  circuit: async () => {
+    log('START', 'info', 'Scenario: Repeated failures opening the circuit breaker');
+    circuitFailures = 0;
+    circuitOpen = false;
+    updateMetrics();
+    for (let i = 0; i < 7; i++) {
+      await simulateRequest({ group: 'quotes', responses: ['fail'] });
+      await delay(80);
+    }
+    log('CIRCUIT', 'err', 'Circuit is OPEN — subsequent requests blocked without hitting the API');
+  },
+  burst: async () => {
+    log('START', 'info', 'Scenario: 10 concurrent requests (token bucket throttles excess)');
+    const jobs = Array.from({ length: 10 }, (_, i) => {
+      const group = ['quotes','fees','liquidity'][i % 3];
+      const responses = Math.random() > .7 ? ['429', 'ok'] : ['ok'];
+      return simulateRequest({ group, responses });
+    });
+    await Promise.all(jobs);
+    log('DONE', 'info', 'Burst complete — token bucket prevented API overload');
+  },
+};
+
+async function runScenario(name) {
+  await SCENARIOS[name]?.();
+}
+
+function clearLog() {
+  document.getElementById('log').innerHTML = '';
+  Object.assign(metrics, { total:0, success:0, retried:0, failed:0, rl:0 });
+  circuitOpen = false;
+  circuitFailures = 0;
+  updateMetrics();
+  log('CLEAR', 'info', 'Log and metrics reset.');
+}
+</script>
+</body>
+</html>
