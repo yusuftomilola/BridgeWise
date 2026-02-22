@@ -9,12 +9,25 @@
  * - Easy extensibility
  */
 
-export type { BridgeAdapter, BridgeAdapterConfig, NormalizedFee, BridgeTokenMapping } from './adapter.interface';
+export type {
+  BridgeAdapter,
+  BridgeAdapterConfig,
+  NormalizedFee,
+  BridgeTokenMapping,
+} from './adapter.interface';
 export type { TokenMapping, ITokenRegistry } from './token-registry.interface';
-export type { AdapterMetadata, BridgeConfig, BridgeCapabilities } from './bridge-config.interface';
+export type {
+  AdapterMetadata,
+  BridgeConfig,
+  BridgeCapabilities,
+} from './bridge-config.interface';
 
 export { BaseBridgeAdapter } from './base-adapter';
-export { AdapterFactory, getAdapterFactory, resetAdapterFactory } from './adapter-factory';
+export {
+  AdapterFactory,
+  getAdapterFactory,
+  resetAdapterFactory,
+} from './adapter-factory';
 export { TokenRegistry } from './token-registry';
 export { FeeNormalizer } from './fee-normalizer';
 

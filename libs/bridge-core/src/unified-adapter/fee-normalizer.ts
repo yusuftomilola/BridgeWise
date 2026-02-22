@@ -107,10 +107,7 @@ export class FeeNormalizer {
    * @param percentage Fee percentage
    * @returns Fee amount as string
    */
-  static convertPercentageToAmount(
-    amount: string,
-    percentage: number,
-  ): string {
+  static convertPercentageToAmount(amount: string, percentage: number): string {
     try {
       const bn = BigInt(amount);
       const fee = (bn * BigInt(Math.round(percentage * 100))) / 10000n;
@@ -172,9 +169,7 @@ export class FeeNormalizer {
    * @returns Routes sorted by fee (lowest first)
    */
   static normalizeRoutesByFees(routes: BridgeRoute[]): BridgeRoute[] {
-    return [...routes].sort((a, b) =>
-      this.compareRoutesFees(a, b),
-    );
+    return [...routes].sort((a, b) => this.compareRoutesFees(a, b));
   }
 
   /**
@@ -222,9 +217,8 @@ export class FeeNormalizer {
       const expensive = BigInt(expensiveRoute.fee);
       const absoluteSavings = expensive - cheaper;
 
-      const percentageSavings = Number(
-        (absoluteSavings * 10000n) / expensive,
-      ) / 100;
+      const percentageSavings =
+        Number((absoluteSavings * 10000n) / expensive) / 100;
 
       return {
         absoluteSavings: absoluteSavings.toString(),
@@ -260,9 +254,8 @@ export class FeeNormalizer {
       if (marketRate) {
         const rate = BigInt(marketRate);
         const expectedOutput = (input * rate) / BigInt(10) ** BigInt(18);
-        const slippage = Number(
-          ((expectedOutput - output) * 10000n) / expectedOutput,
-        ) / 100;
+        const slippage =
+          Number(((expectedOutput - output) * 10000n) / expectedOutput) / 100;
         return Math.max(0, slippage);
       }
 

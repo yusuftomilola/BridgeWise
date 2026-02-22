@@ -79,10 +79,7 @@ export interface ITokenRegistry {
    * @param tokenAddress Token address or symbol
    * @returns Token metadata or null if not found
    */
-  getToken(
-    chain: ChainId,
-    tokenAddress: string,
-  ): Promise<TokenMetadata | null>;
+  getToken(chain: ChainId, tokenAddress: string): Promise<TokenMetadata | null>;
 
   /**
    * Get mapping between tokens on two chains

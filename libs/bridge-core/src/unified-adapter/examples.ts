@@ -1,34 +1,34 @@
 /**
  * BridgeAdapter Usage Examples - Documentation Only
- * 
+ *
  * This file contains reference documentation for implementing and using the
- * Unified Bridge Adapter Interface. All example code is commented out to 
+ * Unified Bridge Adapter Interface. All example code is commented out to
  * avoid TypeScript compilation issues during the build process.
- * 
+ *
  * For detailed implementation examples, see:
  * - UNIFIED_ADAPTER_GUIDE.md
  * - API_REFERENCE.md
  * - QUICK_START.md
- * 
+ *
  * To use these examples, copy the code from the comment blocks below and adapt to your needs.
  */
 
 // Example 1: Implementing a Bridge Adapter
 // ============================================================================
-// 
+//
 // import { BaseBridgeAdapter } from '@bridgewise/bridge-core';
-// 
+//
 // export class MyBridgeAdapter extends BaseBridgeAdapter {
 //   readonly provider = 'mybridge' as const;
-//   
+//
 //   getName(): string {
 //     return 'My Bridge Protocol';
 //   }
-//   
+//
 //   supportsChainPair(source: ChainId, target: ChainId): boolean {
 //     return true; // Implement your chain pair support logic
 //   }
-//   
+//
 //   async fetchRoutes(request: RouteRequest): Promise<BridgeRoute[]> {
 //     // Fetch from your bridge API
 //     return [];

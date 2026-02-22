@@ -81,7 +81,10 @@ export class AdapterFactory {
    * @returns Adapter instance
    * @throws AdapterError if adapter not registered
    */
-  getAdapter(provider: BridgeProvider, createNew: boolean = false): BridgeAdapter {
+  getAdapter(
+    provider: BridgeProvider,
+    createNew: boolean = false,
+  ): BridgeAdapter {
     // Return cached instance if available and not creating new
     if (!createNew && this.instances.has(provider)) {
       return this.instances.get(provider)!;
@@ -146,7 +149,10 @@ export class AdapterFactory {
    * @param provider Bridge provider identifier
    * @param config New configuration
    */
-  updateAdapterConfig(provider: BridgeProvider, config: BridgeAdapterConfig): void {
+  updateAdapterConfig(
+    provider: BridgeProvider,
+    config: BridgeAdapterConfig,
+  ): void {
     if (!this.adapters.has(provider)) {
       throw ADAPTER_ERRORS.invalidConfig(
         `Adapter for provider "${provider}" not registered`,
@@ -305,7 +311,9 @@ export function getAdapterFactory(): AdapterFactory {
  *
  * @async If true, will shutdown adapters before clearing
  */
-export async function resetAdapterFactory(async: boolean = false): Promise<void> {
+export async function resetAdapterFactory(
+  async: boolean = false,
+): Promise<void> {
   if (factoryInstance) {
     await factoryInstance.reset(async);
     factoryInstance = null;

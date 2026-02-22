@@ -272,7 +272,10 @@ export abstract class BaseBridgeAdapter implements BridgeAdapter {
 
     if (source === 'l1' && target === 'l1') {
       return 1200; // 20 minutes average
-    } else if ((source === 'l1' && target === 'l2') || (source === 'l2' && target === 'l1')) {
+    } else if (
+      (source === 'l1' && target === 'l2') ||
+      (source === 'l2' && target === 'l1')
+    ) {
       return 300; // 5 minutes average
     } else {
       return 180; // 3 minutes average for L2->L2

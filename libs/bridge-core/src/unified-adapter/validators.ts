@@ -122,7 +122,9 @@ export function validateTokenMapping(mapping: TokenMapping): void {
         throw new Error('Minimum amount must be non-negative');
       }
     } catch (error) {
-      throw ADAPTER_ERRORS.invalidConfig(`Invalid min amount: ${String(error)}`);
+      throw ADAPTER_ERRORS.invalidConfig(
+        `Invalid min amount: ${String(error)}`,
+      );
     }
   }
 
@@ -133,7 +135,9 @@ export function validateTokenMapping(mapping: TokenMapping): void {
         throw new Error('Maximum amount must be non-negative');
       }
     } catch (error) {
-      throw ADAPTER_ERRORS.invalidConfig(`Invalid max amount: ${String(error)}`);
+      throw ADAPTER_ERRORS.invalidConfig(
+        `Invalid max amount: ${String(error)}`,
+      );
     }
   }
 
@@ -172,7 +176,11 @@ export function validateTokenMetadata(
     throw ADAPTER_ERRORS.invalidConfig(`${context}: Missing or empty name`);
   }
 
-  if (token.decimals === undefined || token.decimals < 0 || token.decimals > 77) {
+  if (
+    token.decimals === undefined ||
+    token.decimals < 0 ||
+    token.decimals > 77
+  ) {
     throw ADAPTER_ERRORS.invalidConfig(
       `${context}: Invalid decimals (must be 0-77)`,
     );
@@ -183,9 +191,7 @@ export function validateTokenMetadata(
   }
 
   if (!token.chain || !isValidChainId(token.chain)) {
-    throw ADAPTER_ERRORS.invalidConfig(
-      `${context}: Invalid chain identifier`,
-    );
+    throw ADAPTER_ERRORS.invalidConfig(`${context}: Invalid chain identifier`);
   }
 }
 
