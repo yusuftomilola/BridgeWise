@@ -1,4 +1,4 @@
-import { RouteRequest, BridgeRoute, NormalizedRoute, ChainId } from './types';
+import { RouteRequest, NormalizedRoute, ChainId } from './types';
 
 /**
  * Validation error with actionable message

@@ -10,7 +10,7 @@ export class TokenService {
   normalizeAmount(
     rawAmount: string | number,
     decimals: number,
-    symbol: string,
+    // Removed unused parameter 'symbol' to resolve lint warning
   ): string {
     try {
       const amount = new BigNumber(rawAmount);
@@ -57,7 +57,7 @@ export class TokenService {
     toDecimals: number,
   ): string {
     try {
-      const normalized = this.normalizeAmount(amount, fromDecimals, '');
+      const normalized = this.normalizeAmount(amount, fromDecimals);
       return this.denormalizeAmount(normalized, toDecimals);
     } catch (error) {
       return '0';
@@ -105,7 +105,7 @@ export class TokenService {
     usdPrice: number,
   ): string {
     try {
-      const normalized = this.normalizeAmount(amount, decimals, '');
+      const normalized = this.normalizeAmount(amount, decimals);
       const usdValue = new BigNumber(normalized).multipliedBy(usdPrice);
       return usdValue.toFixed(2, BigNumber.ROUND_DOWN);
     } catch (error) {

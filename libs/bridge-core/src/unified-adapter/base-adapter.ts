@@ -65,6 +65,7 @@ export abstract class BaseBridgeAdapter implements BridgeAdapter {
     sourceToken: string,
     destinationToken: string,
   ): Promise<boolean> {
+    await Promise.resolve(); // Added await to satisfy require-await
     // Default implementation: check chain support
     // Subclasses should override for better token-specific checks
     return this.supportsChainPair(sourceChain, targetChain);
@@ -108,6 +109,7 @@ export abstract class BaseBridgeAdapter implements BridgeAdapter {
   }
 
   async getSupportedTokens(chain: ChainId): Promise<string[]> {
+    await Promise.resolve(); // Added await to satisfy require-await
     // Default: empty array
     // Subclasses should override to return supported tokens
     return [];

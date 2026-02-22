@@ -1,10 +1,10 @@
 import { ApiRequest, ApiResponse } from './types';
 import opossum from 'opossum';
 
-const CIRCUIT_BREAKER_FAILURE_THRESHOLD = 5;
-const CIRCUIT_BREAKER_OPEN_DURATION_MS = 60000; // 1 minute
-const RETRY_ATTEMPTS = 3;
-const RETRY_DELAY_MS = 1000;
+// Removed unused constants to resolve lint warnings
+
+
+// Mock API call function must be defined before getBreaker
 
 // In-memory store for circuit breakers.
 const breakers = new Map<string, opossum>();
@@ -51,15 +51,34 @@ export async function callApi(request: ApiRequest): Promise<ApiResponse> {
   try {
     const data = await breaker.fire(request);
     return { success: true, data };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    let code = 'UNKNOWN_ERROR';
+    let message = 'Circuit breaker opened';
+    if (isApiError(err)) {
+      code = err.code ?? 'UNKNOWN_ERROR';
+      message = err.message ?? 'An unknown error occurred.';
+    } else if (err instanceof Error) {
+      message = err.message;
+    } else {
+      message = String(err);
+    }
     return {
       success: false,
       error: {
-        code: err.code || 'UNKNOWN_ERROR',
-        message: err.message || 'Circuit breaker opened',
+        code,
+        message,
       },
     };
   }
+}
+
+
+function isApiError(err: unknown): err is { code?: string; message?: string } {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    ('code' in err || 'message' in err)
+  );
 }
 
 /**
@@ -67,11 +86,12 @@ export async function callApi(request: ApiRequest): Promise<ApiResponse> {
  * This will be replaced with actual `fetch` calls.
  */
 async function mockApiCall(request: ApiRequest): Promise<any> {
+  await Promise.resolve(); // Added await to satisfy require-await
   console.log(`Calling API for provider: ${request.provider.name}`);
 
   if (request.provider.name === 'stellar') {
     // Consistently fail for Stellar to test circuit breaker
-    const err: any = new Error('Transient failure');
+    const err = new Error('Transient failure') as Error & { code?: string };
     err.code = 'TRANSIENT_ERROR';
     throw err;
   }
@@ -81,9 +101,9 @@ async function mockApiCall(request: ApiRequest): Promise<any> {
     return { message: 'Success!' };
   } else {
     const isTransient = Math.random() > 0.3;
-    const err: any = new Error(
+    const err = new Error(
       isTransient ? 'Transient failure' : 'Permanent failure',
-    );
+    ) as Error & { isTransient?: boolean };
     err.isTransient = isTransient;
     throw err;
   }

@@ -73,7 +73,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         type: ErrorType.INTERNAL,
         details: {
           requestId,
-          error: String(exception),
+          error:
+            exception instanceof Error
+              ? exception.message
+              : JSON.stringify(exception),
         },
       };
     }
@@ -114,7 +117,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     if (httpStatus >= 500) {
       this.logger.error(
         `Request failed: ${request.method} ${request.path}`,
-        exception instanceof Error ? exception.stack : String(exception),
+        exception instanceof Error
+          ? exception.stack
+          : JSON.stringify(exception),
         { meta: logData },
       );
     } else {

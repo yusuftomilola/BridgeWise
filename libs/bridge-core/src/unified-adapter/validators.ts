@@ -161,36 +161,42 @@ export function validateTokenMapping(mapping: TokenMapping): void {
  * @throws AdapterError if metadata is invalid
  */
 export function validateTokenMetadata(
-  token: any,
+  token: unknown,
   context: string = 'Token',
 ): void {
-  if (!token) {
+  if (!token || typeof token !== 'object') {
     throw ADAPTER_ERRORS.invalidConfig(`Missing ${context}`);
   }
-
-  if (!token.symbol || token.symbol.trim().length === 0) {
+  const t = token as {
+    symbol?: string;
+    name?: string;
+    decimals?: number;
+    address?: string;
+    chain?: unknown;
+  };
+  if (
+    !t.symbol ||
+    typeof t.symbol !== 'string' ||
+    t.symbol.trim().length === 0
+  ) {
     throw ADAPTER_ERRORS.invalidConfig(`${context}: Missing or empty symbol`);
   }
-
-  if (!token.name || token.name.trim().length === 0) {
+  if (!t.name || typeof t.name !== 'string' || t.name.trim().length === 0) {
     throw ADAPTER_ERRORS.invalidConfig(`${context}: Missing or empty name`);
   }
-
-  if (
-    token.decimals === undefined ||
-    token.decimals < 0 ||
-    token.decimals > 77
-  ) {
+  if (typeof t.decimals !== 'number' || t.decimals < 0 || t.decimals > 77) {
     throw ADAPTER_ERRORS.invalidConfig(
       `${context}: Invalid decimals (must be 0-77)`,
     );
   }
-
-  if (!token.address || token.address.trim().length === 0) {
+  if (
+    !t.address ||
+    typeof t.address !== 'string' ||
+    t.address.trim().length === 0
+  ) {
     throw ADAPTER_ERRORS.invalidConfig(`${context}: Missing or empty address`);
   }
-
-  if (!token.chain || !isValidChainId(token.chain)) {
+  if (!t.chain || !isValidChainId(t.chain)) {
     throw ADAPTER_ERRORS.invalidConfig(`${context}: Invalid chain identifier`);
   }
 }
@@ -202,7 +208,8 @@ export function validateTokenMetadata(
  * @returns True if chain is valid
  */
 export function isValidChainId(chain: any): chain is ChainId {
-  const validChains: ChainId[] = [
+  if (typeof chain !== 'string') return false;
+  const validChains: readonly ChainId[] = [
     'ethereum',
     'stellar',
     'polygon',
@@ -214,7 +221,7 @@ export function isValidChainId(chain: any): chain is ChainId {
     'bsc',
     'avalanche',
   ];
-  return validChains.includes(chain);
+  return (validChains as readonly string[]).includes(chain);
 }
 
 /**
@@ -227,7 +234,7 @@ export function isValidChainId(chain: any): chain is ChainId {
 function validateUrl(url: string, context: string): void {
   try {
     new URL(url);
-  } catch (error) {
+  } catch {
     throw ADAPTER_ERRORS.invalidConfig(`${context}: Invalid URL format`);
   }
 }

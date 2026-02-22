@@ -21,7 +21,7 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BridgeValidator = exports.BridgeAggregator = exports.StellarAdapter = exports.LayerZeroAdapter = exports.HopAdapter = exports.BaseBridgeAdapter = void 0;
+exports.BridgeValidator = exports.DEFAULT_RANKING_WEIGHTS = exports.RouteRanker = exports.BridgeAggregator = exports.StellarAdapter = exports.LayerZeroAdapter = exports.HopAdapter = exports.BaseBridgeAdapter = void 0;
 exports.getBridgeRoutes = getBridgeRoutes;
 const aggregator_1 = require("./aggregator");
 // Types
@@ -36,14 +36,22 @@ var stellar_1 = require("./adapters/stellar");
 Object.defineProperty(exports, "StellarAdapter", { enumerable: true, get: function () { return stellar_1.StellarAdapter; } });
 // Fee Estimation
 __exportStar(require("./fee-estimation"), exports);
+// Benchmarking
+__exportStar(require("./benchmark"), exports);
 // Error Codes and Mapping
 __exportStar(require("./error-codes"), exports);
 // Aggregator
 var aggregator_2 = require("./aggregator");
 Object.defineProperty(exports, "BridgeAggregator", { enumerable: true, get: function () { return aggregator_2.BridgeAggregator; } });
+// Route Ranker
+var ranker_1 = require("./ranker");
+Object.defineProperty(exports, "RouteRanker", { enumerable: true, get: function () { return ranker_1.RouteRanker; } });
+Object.defineProperty(exports, "DEFAULT_RANKING_WEIGHTS", { enumerable: true, get: function () { return ranker_1.DEFAULT_RANKING_WEIGHTS; } });
 // Validator
 var validator_1 = require("./validator");
 Object.defineProperty(exports, "BridgeValidator", { enumerable: true, get: function () { return validator_1.BridgeValidator; } });
+// Unified Adapter System
+__exportStar(require("./unified-adapter"), exports);
 /**
  * Main function to get aggregated bridge routes
  *
@@ -56,11 +64,17 @@ Object.defineProperty(exports, "BridgeValidator", { enumerable: true, get: funct
  *   targetChain: 'polygon',
  *   assetAmount: '1000000000000000000', // 1 ETH in wei
  *   slippageTolerance: 0.5
+ * }, {
+ *   rankingWeights: {
+ *     costWeight: 0.5,      // Prioritize cheaper routes
+ *     latencyWeight: 0.3,   // Consider speed
+ *     reliabilityWeight: 0.2 // Consider reliability
+ *   }
  * });
  *
  * console.log(`Found ${routes.routes.length} routes`);
  * routes.routes.forEach(route => {
- *   console.log(`${route.provider}: ${route.feePercentage}% fee, ${route.estimatedTime}s`);
+ *   console.log(`${route.provider}: ${route.feePercentage}% fee, ${route.estimatedTime}s, reliability: ${route.reliability}`);
  * });
  * ```
  */

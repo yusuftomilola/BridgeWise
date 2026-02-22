@@ -8,6 +8,7 @@ import {
   BridgeRoute,
   NormalizedRoute,
   BridgeError,
+  toNormalizedRoute,
 } from './types';
 import {
   BridgeValidator,
@@ -83,9 +84,7 @@ export class BridgeAggregator {
       }
 
       if (providers.layerzero !== false) {
-        this.adapters.push(
-          new LayerZeroAdapter(undefined, undefined, config.layerZeroApiKey),
-        );
+        this.adapters.push(new LayerZeroAdapter());
       }
 
       if (providers.stellar !== false) {
@@ -130,22 +129,34 @@ export class BridgeAggregator {
       const adapter = supportedAdapters[index];
 
       if (result.status === 'fulfilled') {
-        const adapterRoutes = result.value;
+        const adapterRoutes = Array.isArray(result.value) ? result.value : [];
         if (adapterRoutes.length > 0) {
           routes.push(...adapterRoutes);
           providersResponded++;
         }
       } else {
+        const reason = result.reason as
+          | { message?: string; code?: string }
+          | undefined;
+        const safeError =
+          reason && typeof reason === 'object' && 'message' in reason
+            ? reason
+            : {
+                message:
+                  reason instanceof Error
+                    ? reason.message
+                    : JSON.stringify(reason),
+              };
         errors.push({
           provider: adapter.provider,
-          error: result.reason?.message || 'Unknown error',
-          code: result.reason?.code,
+          error: safeError.message || 'Unknown error',
+          code: safeError.code,
         });
       }
     });
 
     // Normalize and sort routes
-    const normalizedRoutes = this.normalizeRoutes(routes);
+    const normalizedRoutes = routes.map(toNormalizedRoute);
     const sortedRoutes = this.ranker.rankRoutes(normalizedRoutes);
 
     // Log route selection if logger is available

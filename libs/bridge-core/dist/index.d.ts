@@ -7,6 +7,7 @@
  */
 import { BridgeAggregator } from './aggregator';
 import type { RouteRequest } from './types';
+import type { RankingWeights } from './ranker';
 export * from './types';
 export type { BridgeAdapter } from './adapters/base';
 export { BaseBridgeAdapter } from './adapters/base';
@@ -14,11 +15,15 @@ export { HopAdapter } from './adapters/hop';
 export { LayerZeroAdapter } from './adapters/layerzero';
 export { StellarAdapter } from './adapters/stellar';
 export * from './fee-estimation';
+export * from './benchmark';
 export * from './error-codes';
 export { BridgeAggregator } from './aggregator';
 export type { AggregatorConfig } from './aggregator';
+export { RouteRanker, DEFAULT_RANKING_WEIGHTS } from './ranker';
+export type { RankingWeights } from './ranker';
 export { BridgeValidator } from './validator';
 export type { ValidationError, ValidationResult, BridgeExecutionRequest, } from './validator';
+export * from './unified-adapter';
 /**
  * Main function to get aggregated bridge routes
  *
@@ -31,11 +36,17 @@ export type { ValidationError, ValidationResult, BridgeExecutionRequest, } from 
  *   targetChain: 'polygon',
  *   assetAmount: '1000000000000000000', // 1 ETH in wei
  *   slippageTolerance: 0.5
+ * }, {
+ *   rankingWeights: {
+ *     costWeight: 0.5,      // Prioritize cheaper routes
+ *     latencyWeight: 0.3,   // Consider speed
+ *     reliabilityWeight: 0.2 // Consider reliability
+ *   }
  * });
  *
  * console.log(`Found ${routes.routes.length} routes`);
  * routes.routes.forEach(route => {
- *   console.log(`${route.provider}: ${route.feePercentage}% fee, ${route.estimatedTime}s`);
+ *   console.log(`${route.provider}: ${route.feePercentage}% fee, ${route.estimatedTime}s, reliability: ${route.reliability}`);
  * });
  * ```
  */
@@ -47,6 +58,7 @@ export declare function getBridgeRoutes(request: RouteRequest, config?: {
     };
     layerZeroApiKey?: string;
     timeout?: number;
+    rankingWeights?: RankingWeights;
 }): Promise<import("./types").AggregatedRoutes>;
 declare const _default: {
     BridgeAggregator: typeof BridgeAggregator;

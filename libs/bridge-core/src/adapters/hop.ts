@@ -55,10 +55,18 @@ export class HopAdapter extends BaseBridgeAdapter {
 
     try {
       // Hop API requires token address, defaulting to native token if not provided
-      const token = request.tokenAddress || 'native';
-      const slippage = request.slippageTolerance || 0.5;
+      const token: string = request.tokenAddress || 'native';
+      const slippage: number = request.slippageTolerance || 0.5;
 
-      const response = await this.apiClient.get('/v1/quote', {
+      interface HopQuote {
+        amountOutMin: string;
+        estimatedReceived?: string;
+        bonderFee?: string;
+        deadline?: string;
+        gasEstimate?: string;
+      }
+
+      const response = await this.apiClient.get<HopQuote>('/v1/quote', {
         params: {
           amount: request.assetAmount,
           token,
@@ -69,23 +77,26 @@ export class HopAdapter extends BaseBridgeAdapter {
         },
       });
 
-      const quote = response.data;
+      const quote: HopQuote = response.data;
 
-      if (!quote || !quote.amountOutMin) {
+      if (!quote || typeof quote.amountOutMin !== 'string') {
         return [];
       }
 
       // Calculate estimated received amount
-      const estimatedReceived = quote.estimatedReceived || quote.amountOutMin;
-      const bonderFee = quote.bonderFee || '0';
+      const estimatedReceived: string =
+        quote.estimatedReceived || quote.amountOutMin;
+      const bonderFee: string = quote.bonderFee || '0';
 
       // Calculate output amount (estimated received)
-      const outputAmount = BigInt(estimatedReceived).toString();
-      const inputAmount = BigInt(request.assetAmount);
-      const fee = BigInt(bonderFee);
+      const outputAmount: string = BigInt(estimatedReceived).toString();
+      const inputAmount: bigint = BigInt(request.assetAmount);
+      const fee: bigint = BigInt(bonderFee);
 
       // Estimate time: Hop typically takes 2-5 minutes for L2->L2, 10-20 minutes for L1->L2
-      const estimatedTime = this.estimateBridgeTime(sourceChain, targetChain);
+      const estimatedTime: number = this.estimateBridgeTime(
+        sourceChain,
+      );
 
       const route: BridgeRoute = {
         id: this.generateRouteId(
@@ -121,9 +132,11 @@ export class HopAdapter extends BaseBridgeAdapter {
       };
 
       return [route];
-    } catch (error) {
+    } catch (error: unknown) {
       // Log error but don't throw - return empty array to allow other providers to respond
-      console.error(`[HopAdapter] Error fetching routes:`, error);
+      if (error instanceof Error) {
+        console.error(`[HopAdapter] Error fetching routes:`, error.message);
+      }
       return [];
     }
   }
@@ -131,7 +144,7 @@ export class HopAdapter extends BaseBridgeAdapter {
   /**
    * Estimate bridge time based on chain pair
    */
-  private estimateBridgeTime(sourceChain: string, targetChain: string): number {
+  private estimateBridgeTime(sourceChain: string): number {
     const isL1 = sourceChain === 'ethereum';
     const isL2 = [
       'polygon',

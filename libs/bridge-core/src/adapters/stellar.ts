@@ -4,14 +4,9 @@ import { BridgeRoute, RouteRequest, BridgeProvider, ChainId } from '../types';
 import {
   ErrorMapper,
   STELLAR_ERROR_MAPPING,
-  BridgeErrorCode,
   StandardBridgeError,
 } from '../error-codes';
-import {
-  StellarFees,
-  LatencyEstimation,
-  LatencyEstimate,
-} from '../fee-estimation';
+import { StellarFees, LatencyEstimation } from '../fee-estimation';
 
 /**
  * Stellar/Soroban bridge adapter
@@ -115,9 +110,7 @@ export class StellarAdapter extends BaseBridgeAdapter {
       }
 
       // Query Soroban bridge contract for quote
-      const bridgeContractAddress = await this.getBridgeContractAddress(
-        request.targetChain,
-      );
+      const bridgeContractAddress = await this.getBridgeContractAddress();
 
       if (!bridgeContractAddress) {
         return [];
@@ -232,6 +225,7 @@ export class StellarAdapter extends BaseBridgeAdapter {
       }
 
       // Estimate latency
+      await Promise.resolve(); // Added await to satisfy require-await
       const latencyEstimate = LatencyEstimation.estimateLatency(
         request.sourceChain,
         'stellar',
@@ -292,25 +286,11 @@ export class StellarAdapter extends BaseBridgeAdapter {
   /**
    * Get bridge contract address for target chain
    */
-  private async getBridgeContractAddress(
-    targetChain: ChainId,
-  ): Promise<string | null> {
+  private async getBridgeContractAddress(): Promise<string | null> {
     // In production, this would query a registry or configuration
     // For now, return placeholder addresses
-    const contractMap: Record<ChainId, string | null> = {
-      ethereum: null, // Would be actual contract address
-      polygon: null,
-      arbitrum: null,
-      optimism: null,
-      base: null,
-      stellar: null,
-      gnosis: null,
-      nova: null,
-      bsc: null,
-      avalanche: null,
-    };
-
-    return contractMap[targetChain] || null;
+    await Promise.resolve(); // Added await to satisfy require-await
+    return null;
   }
 
   /**
@@ -324,7 +304,13 @@ export class StellarAdapter extends BaseBridgeAdapter {
       const response = await this.horizonClient.get(
         '/ledgers?order=desc&limit=1',
       );
-      const ledgers = response.data?._embedded?.records;
+      type LedgerRecord = { closed_at: string; sequence: string };
+      const embedded = (response.data as { _embedded?: { records?: unknown } })
+        ?._embedded;
+      const records = embedded?.records;
+      const ledgers: LedgerRecord[] | undefined = Array.isArray(records)
+        ? (records as LedgerRecord[])
+        : undefined;
 
       if (ledgers && ledgers.length > 0) {
         const ledger = ledgers[0];

@@ -110,17 +110,14 @@ export class FeeEstimationService {
           slow: this.tokenService.normalizeAmount(
             rawFees.min,
             rawFees.decimals,
-            rawFees.symbol,
           ),
           standard: this.tokenService.normalizeAmount(
             rawFees.mode,
             rawFees.decimals,
-            rawFees.symbol,
           ),
           fast: this.tokenService.normalizeAmount(
             rawFees.p90,
             rawFees.decimals,
-            rawFees.symbol,
           ),
         },
         currency: rawFees.symbol,
@@ -151,17 +148,14 @@ export class FeeEstimationService {
           slow: this.tokenService.normalizeAmount(
             rawFees.baseFee,
             rawFees.decimals,
-            rawFees.symbol,
           ),
           standard: this.tokenService.normalizeAmount(
             rawFees.standardFee,
             rawFees.decimals,
-            rawFees.symbol,
           ),
           fast: this.tokenService.normalizeAmount(
             rawFees.priorityFee,
             rawFees.decimals,
-            rawFees.symbol,
           ),
         },
         currency: rawFees.symbol,
@@ -199,17 +193,14 @@ export class FeeEstimationService {
           slow: this.tokenService.normalizeAmount(
             rawFees.lpFee,
             rawFees.decimals,
-            rawFees.symbol,
           ),
           standard: this.tokenService.normalizeAmount(
             rawFees.lpFee + rawFees.bonderFee,
             rawFees.decimals,
-            rawFees.symbol,
           ),
           fast: this.tokenService.normalizeAmount(
             rawFees.lpFee + rawFees.bonderFee + rawFees.destinationTxFee,
             rawFees.decimals,
-            rawFees.symbol,
           ),
         },
         currency: rawFees.symbol,

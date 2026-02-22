@@ -175,6 +175,8 @@ export const ADAPTER_ERRORS = {
     new AdapterError(
       AdapterErrorCode.INTERNAL_ERROR,
       message,
-      originalError ? { originalError: String(originalError) } : undefined,
+      originalError
+        ? { originalError: JSON.stringify(originalError) }
+        : undefined,
     ),
 };
