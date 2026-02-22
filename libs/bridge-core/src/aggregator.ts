@@ -139,10 +139,14 @@ export class BridgeAggregator {
         const reason = result.reason as
           | { message?: string; code?: string }
           | undefined;
+        const safeError =
+          reason && typeof reason === 'object' && 'message' in reason
+            ? reason
+            : { message: String(reason) };
         errors.push({
           provider: adapter.provider,
-          error: reason?.message || 'Unknown error',
-          code: reason?.code,
+          error: safeError.message || 'Unknown error',
+          code: safeError.code,
         });
       }
     });

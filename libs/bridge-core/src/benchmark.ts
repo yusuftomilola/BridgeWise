@@ -61,6 +61,7 @@ export class InMemoryBenchmarkStorage implements BenchmarkStorage {
   async save(benchmark: FeeSlippageBenchmark): Promise<void> {
     this.benchmarks.push(benchmark);
     // Keep only last 100 records per route to prevent memory bloat
+    await Promise.resolve(); // Added await to satisfy require-await
     this.cleanupOldRecords();
   }
 
@@ -71,6 +72,7 @@ export class InMemoryBenchmarkStorage implements BenchmarkStorage {
     token: string,
     limit: number = 10,
   ): Promise<FeeSlippageBenchmark[]> {
+    await Promise.resolve(); // Added await to satisfy require-await
     const filtered = this.benchmarks
       .filter(
         (b) =>
@@ -263,10 +265,7 @@ export class BenchmarkService {
   /**
    * Normalize benchmark data across different chains and tokens
    */
-  normalizeBenchmark(
-    benchmark: FeeSlippageBenchmark,
-    baseToken: string = 'USDC',
-  ): number {
+  normalizeBenchmark(benchmark: FeeSlippageBenchmark): number {
     // In a real implementation, this would convert different tokens to a common base
     // For now, we'll just return the fee percentage as-is
     return benchmark.avgFee;

@@ -172,7 +172,7 @@ export class BenchmarkService {
       if (!grouped.has(key)) {
         grouped.set(key, []);
       }
-      grouped.get(key)!.push(benchmark);
+      grouped.get(key).push(benchmark);
     }
 
     // Keep only last 100 records per group

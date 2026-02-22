@@ -32,12 +32,11 @@ export interface LatencyEstimate {
 /**
  * Stellar-specific fee constants and calculations
  */
-export namespace StellarFees {
-  // Base fee per operation in stroops (1 XLM = 10,000,000 stroops)
-  export const BASE_OPERATION_FEE = 100n; // stroops
+// Base fee per operation in stroops (1 XLM = 10,000,000 stroops)
+export const BASE_OPERATION_FEE = 100n; // stroops
 
-  // Typical transaction size in operations
-  export const TYPICAL_TX_SIZE = 2n; // 2 operations for a bridge tx
+// Typical transaction size in operations
+export const TYPICAL_TX_SIZE = 2n; // 2 operations for a bridge tx
 
   // Bridge protocol fees (in basis points, 1 bp = 0.01%)
   export const STELLAR_TO_EVM_BRIDGE_FEE_BP = 50n; // 0.5%
@@ -136,9 +135,8 @@ export namespace StellarFees {
 /**
  * Latency estimation for bridge operations
  */
-export namespace LatencyEstimation {
-  // Baseline latencies in seconds
-  const STELLAR_NETWORK_LATENCY = 2; // Stellar close time
+// Baseline latencies in seconds
+export const STELLAR_NETWORK_LATENCY = 2; // Stellar close time
   const EVM_NETWORK_LATENCY_L1 = 12; // Ethereum block time
   const EVM_NETWORK_LATENCY_L2 = 2; // Optimistic L2 block time
 
@@ -223,4 +221,4 @@ export namespace LatencyEstimation {
     const hours = Math.ceil(minutes / 60);
     return `~${hours}h (${confidence}% confidence)`;
   }
-}
+// End of file
