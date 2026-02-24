@@ -14,6 +14,8 @@ export { BaseBridgeAdapter } from './adapters/base';
 export { HopAdapter } from './adapters/hop';
 export { LayerZeroAdapter } from './adapters/layerzero';
 export { StellarAdapter } from './adapters/stellar';
+export { MockBridgeAdapter, createMockAdapter } from './adapters/mock';
+export type { MockAdapterConfig } from './adapters/mock';
 export * from './fee-estimation';
 export * from './benchmark';
 export * from './error-codes';
@@ -24,6 +26,7 @@ export type { RankingWeights } from './ranker';
 export { BridgeValidator } from './validator';
 export type { ValidationError, ValidationResult, BridgeExecutionRequest, } from './validator';
 export * from './unified-adapter';
+export * from './compatibility';
 /**
  * Main function to get aggregated bridge routes
  *

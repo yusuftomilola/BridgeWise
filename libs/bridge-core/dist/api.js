@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.callApi = callApi;
 const opossum_1 = __importDefault(require("opossum"));
 // Removed unused constants to resolve lint warnings
+// Mock API call function must be defined before getBreaker
 // In-memory store for circuit breakers.
 const breakers = new Map();
 function getBreaker(providerName) {
@@ -44,18 +45,15 @@ async function callApi(request) {
     catch (err) {
         let code = 'UNKNOWN_ERROR';
         let message = 'Circuit breaker opened';
-        const safeErr = err && typeof err === 'object' && 'code' in err
-            ? err
-            : { code: 'UNKNOWN_ERROR', message: String(err) };
-        if (typeof safeErr === 'object' && safeErr) {
-            if ('code' in safeErr &&
-                typeof safeErr.code === 'string') {
-                code = safeErr.code;
-            }
-            if ('message' in err &&
-                typeof err.message === 'string') {
-                message = err.message;
-            }
+        if (isApiError(err)) {
+            code = err.code ?? 'UNKNOWN_ERROR';
+            message = err.message ?? 'An unknown error occurred.';
+        }
+        else if (err instanceof Error) {
+            message = err.message;
+        }
+        else {
+            message = String(err);
         }
         return {
             success: false,
@@ -65,6 +63,11 @@ async function callApi(request) {
             },
         };
     }
+}
+function isApiError(err) {
+    return (typeof err === 'object' &&
+        err !== null &&
+        ('code' in err || 'message' in err));
 }
 /**
  * A mock API call function to simulate network requests.

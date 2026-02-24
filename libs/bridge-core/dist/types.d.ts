@@ -1,4 +1,8 @@
 /**
+ * Mapper: BridgeRoute → NormalizedRoute
+ */
+export declare function toNormalizedRoute(route: BridgeRoute): NormalizedRoute;
+/**
  * Supported chain identifiers
  */
 export type ChainId = 'ethereum' | 'stellar' | 'polygon' | 'arbitrum' | 'optimism' | 'base' | 'gnosis' | 'nova' | 'bsc' | 'avalanche';

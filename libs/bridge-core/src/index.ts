@@ -50,6 +50,9 @@ export type {
 // Unified Adapter System
 export * from './unified-adapter';
 
+// Token Pair Compatibility Engine
+export * from './compatibility';
+
 /**
  * Main function to get aggregated bridge routes
  *
